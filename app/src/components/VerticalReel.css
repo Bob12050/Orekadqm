@@ -1,0 +1,110 @@
+.reel-viewport {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #11162e 0%, #1b2350 50%, #11162e 100%);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.45);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+}
+
+/* 停止ライン（中央） */
+.reel-stopline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 64px;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+  border-top: 2px solid rgba(255, 213, 79, 0.9);
+  border-bottom: 2px solid rgba(255, 213, 79, 0.9);
+  box-shadow: 0 0 16px rgba(255, 213, 79, 0.35) inset;
+}
+.reel-stopline::before,
+.reel-stopline::after {
+  content: '▶';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffd54f;
+  font-size: 14px;
+  text-shadow: 0 0 6px rgba(255, 213, 79, 0.8);
+}
+.reel-stopline::before { left: 6px; }
+.reel-stopline::after { right: 6px; content: '◀'; }
+
+.reel-strip {
+  will-change: transform;
+}
+
+.reel-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 0 10px;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.reel-panel.centered {
+  transform: scale(1.04);
+  background: rgba(255, 213, 79, 0.1);
+}
+
+.panel-bar {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 5px;
+  border-radius: 3px;
+}
+
+.panel-stars {
+  font-size: 13px;
+  letter-spacing: -1px;
+  color: #ffd54f;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+.panel-skill {
+  font-weight: 700;
+  font-size: 16px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.panel-cat {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #e6ebff;
+}
+
+.cat-miss .panel-skill { color: #99a3bf; }
+.cat-miss .panel-stars { color: #99a3bf; }
+.cat-ultimate .panel-skill { color: #ffe082; text-shadow: 0 0 8px rgba(255, 202, 40, 0.7); }
+
+.panel-new {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  color: #1b2240;
+  background: #ffd54f;
+  border-radius: 4px;
+  padding: 1px 5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.reel-viewport.is-spinning .reel-strip {
+  filter: blur(0.4px);
+}
