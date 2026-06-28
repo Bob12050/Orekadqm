@@ -161,6 +161,31 @@ export function levelUpMonster(uid: string): { before: string; after: string } |
   return null
 }
 
+export const AWAKEN_LV = 15
+
+export function canAwaken(uid: string): boolean {
+  const m = getMonster(uid)
+  return !!m && !m.awakened && m.level >= AWAKEN_LV
+}
+
+/** 覚醒（DD-002）。見た目バッジ＋ステUP＋リール枠+1（高★パネル追加）。 */
+export function awaken(uid: string): { added: string } | null {
+  const m = getMonster(uid)
+  if (!m || m.awakened || m.level < AWAKEN_LV) return null
+  const sp = getSpeciesById(m.speciesId)
+  const pool = poolForFamily(sp?.family ?? 'beast')
+  const strong = pool.filter((p) => p.star >= 3)
+  const add = (strong.length ? strong : pool).find((p) => !m.reel.some((r) => r.skill === p.skill))
+  const reel = add
+    ? [
+        ...m.reel.map((p) => ({ ...p, isNew: false })),
+        { skill: add.skill, star: add.star, category: add.category, locked: false, isNew: true },
+      ]
+    : m.reel
+  updateMonster(uid, { awakened: true, reel })
+  return { added: add?.skill ?? '—' }
+}
+
 export function toggleLockPanel(uid: string, index: number): void {
   const m = getMonster(uid)
   if (!m) return

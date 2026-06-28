@@ -5,6 +5,9 @@ import { ATTRIBUTE_LABEL } from '../battle/attributes'
 import { ownedPower } from '../state/collection'
 import { getSpeciesById } from '../data/monsters'
 import {
+  awaken,
+  AWAKEN_LV,
+  canAwaken,
   levelUpMonster,
   PARTY_LIMIT,
   toggleLockPanel,
@@ -41,6 +44,12 @@ export default function TrainScreen() {
     else setLog((l) => ['Lv↑: 変化なし（全枠ロック）', ...l].slice(0, 8))
   }
 
+  function doAwaken() {
+    if (!sel) return
+    const r = awaken(sel.uid)
+    if (r) setLog((l) => [`✦覚醒！ ${sel.name} は「${r.added}」を得た！`, ...l].slice(0, 8))
+  }
+
   if (!sel) {
     return <div className="train-empty">コドモナがいません。バトルでスカウトするか、配合で生み出そう。</div>
   }
@@ -58,7 +67,10 @@ export default function TrainScreen() {
 
       <div className="tr-detail">
         <div className="tr-head">
-          <div className="tr-name">{sel.name}</div>
+          <div className={`tr-name${sel.awakened ? ' awakened' : ''}`}>
+            {sel.awakened && <span className="tr-awk-mark">✦</span>}
+            {sel.name}
+          </div>
           <div className="tr-meta">
             {sp?.family}/{sp?.rank} ・ Lv{sel.level} ・ {ATTRIBUTE_LABEL[sel.attribute]}
             {sel.subAttribute ? `+${ATTRIBUTE_LABEL[sel.subAttribute]}` : ''} ・ ★{ownedPower(sel).toFixed(2)}
@@ -80,6 +92,16 @@ export default function TrainScreen() {
             {inParty ? '編成から外す' : '編成に入れる'}
           </button>
         </div>
+
+        {sel.awakened ? (
+          <div className="tr-awk-banner">✦ 覚醒済み ・ ステータス上昇＋枠拡張</div>
+        ) : canAwaken(sel.uid) ? (
+          <button className="tr-awaken" onClick={doAwaken}>
+            ✦ 覚醒する！（Lv{AWAKEN_LV}到達）
+          </button>
+        ) : (
+          <div className="tr-awk-hint">Lv{AWAKEN_LV} で覚醒できる（見た目・ステ・枠が一段強化）</div>
+        )}
 
         <div className="tr-reel-edit">
           <div className="tr-sub">リール編成（タップでロック）</div>
@@ -116,7 +138,10 @@ export default function TrainScreen() {
                 onClick={() => setSelUid(m.uid)}
               >
                 {party.includes(m.uid) && <span className="tr-card-badge">編成</span>}
-                <div className="tr-card-name">{m.name}</div>
+                <div className="tr-card-name">
+                  {m.awakened && <span className="tr-awk-mark">✦</span>}
+                  {m.name}
+                </div>
                 <div className="tr-card-sub">
                   {msp?.family}/{msp?.rank} Lv{m.level}
                   {m.generation > 0 ? ` ・${m.generation}世代` : ''}

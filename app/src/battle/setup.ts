@@ -22,11 +22,24 @@ function scaledStats(speciesId: number, level: number): Stats {
   }
 }
 
+const AWAKEN_STAT_MULT = 1.15
+
 /** 所持個体(育ったリール持ち)から味方バトルユニットを生成 */
 export function makeUnitFromOwned(owned: OwnedMonster, slot: number): BattleUnit {
   const sp = getSpeciesById(owned.speciesId)
   if (!sp) throw new Error(`unknown species: ${owned.speciesId}`)
-  const base = scaledStats(owned.speciesId, owned.level)
+  const raw = scaledStats(owned.speciesId, owned.level)
+  // 覚醒: HP/攻/防/魔/速を底上げ（命中/運は据え置き）
+  const m = owned.awakened ? AWAKEN_STAT_MULT : 1
+  const base: Stats = {
+    hp: Math.round(raw.hp * m),
+    atk: Math.round(raw.atk * m),
+    def: Math.round(raw.def * m),
+    mag: Math.round(raw.mag * m),
+    spd: Math.round(raw.spd * m),
+    acc: raw.acc,
+    luck: raw.luck,
+  }
   return {
     uid: `ally-${slot}`,
     name: owned.name,
@@ -44,6 +57,7 @@ export function makeUnitFromOwned(owned: OwnedMonster, slot: number): BattleUnit
     reel: owned.reel.map((p) => ({ ...p })), // 育った個体のリールを持ち込む
     statuses: [],
     alive: true,
+    awakened: owned.awakened,
   }
 }
 

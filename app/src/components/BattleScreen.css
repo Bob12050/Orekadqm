@@ -158,6 +158,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.u-awk {
+  color: #ffca28;
+  margin-right: 1px;
+}
 .u-attr {
   font-size: 10px;
   color: #9aa3c8;

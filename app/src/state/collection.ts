@@ -14,6 +14,7 @@ export interface OwnedMonster {
   personality?: string
   generation: number // 配合世代(0=初期/スカウト)
   bornFrom?: [number, number] // 親の speciesId
+  awakened?: boolean // 覚醒済み(見た目・ステ・枠数が一段上昇 / DD-002)
 }
 
 let counter = 0

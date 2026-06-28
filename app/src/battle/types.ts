@@ -51,6 +51,7 @@ export interface BattleUnit {
   reel: Panel[]
   statuses: StatusInstance[]
   alive: boolean
+  awakened?: boolean
 }
 
 export type Outcome = 'ongoing' | 'win' | 'lose'
