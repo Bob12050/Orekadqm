@@ -12,6 +12,7 @@
 | ファイル | 内容 |
 | --- | --- |
 | [`docs/game-design.md`](docs/game-design.md) | **メイン設計書**（全15章。コンセプト〜MVP〜ワイヤーフレーム） |
+| [`docs/design-decisions.md`](docs/design-decisions.md) | **設計判断ログ**（確定事項。縦式リール／覚醒／配合方針など） |
 | [`docs/monsters.md`](docs/monsters.md) | 初期実装用モンスター30体の詳細設計 |
 | [`docs/chapters.md`](docs/chapters.md) | 全10章のストーリー・進行・ボス設計 |
 | [`data/monsters.json`](data/monsters.json) | モンスター30体の機械可読データ（MVP実装用） |
