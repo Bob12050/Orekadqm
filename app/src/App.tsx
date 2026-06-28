@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import BattleScreen from './components/BattleScreen'
+import FusionScreen from './components/FusionScreen'
 import { VerticalReel, type VerticalReelHandle } from './components/VerticalReel'
 import { categoryLabel, stars } from './components/display'
 import { getSpeciesById, poolForFamily, rareJumpChance, species, toRuntimeReel } from './data/monsters'
@@ -25,7 +26,7 @@ export default function App() {
   const [lastMutation, setLastMutation] = useState<{ index: number; before: Panel } | null>(null)
   const [manualRunning, setManualRunning] = useState(false)
 
-  const [view, setView] = useState<'reel' | 'battle'>('reel')
+  const [view, setView] = useState<'reel' | 'battle' | 'fusion'>('reel')
   const reelRef = useRef<VerticalReelHandle>(null)
 
   // シード付き RNG（スピンごと・レベルアップごとに進める）。同シード→同結果で再現可能。
@@ -140,9 +141,13 @@ export default function App() {
         <button className={view === 'battle' ? 'on' : ''} onClick={() => setView('battle')}>
           4対4バトル
         </button>
+        <button className={view === 'fusion' ? 'on' : ''} onClick={() => setView('fusion')}>
+          配合
+        </button>
       </div>
 
       {view === 'battle' && <BattleScreen />}
+      {view === 'fusion' && <FusionScreen />}
 
       {view === 'reel' && (
       <>
