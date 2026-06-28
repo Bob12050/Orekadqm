@@ -1,0 +1,38 @@
+.phaser-battle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.pb-note {
+  font-size: 12px;
+  color: #ffcc80;
+  text-align: center;
+}
+.pb-host {
+  width: 100%;
+  max-width: 390px;
+  aspect-ratio: 390 / 640;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #2c3566;
+}
+.pb-host canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+.pb-restart {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1b2240;
+  background: linear-gradient(180deg, #ffd54f, #ffb300);
+}
+.pb-empty {
+  text-align: center;
+  color: #98a2c8;
+  padding: 40px 16px;
+}
