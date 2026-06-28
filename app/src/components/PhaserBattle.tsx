@@ -1,39 +1,57 @@
-// Phaser バトル PoC の React ラッパ。store の編成 + デモ敵でエンジンを組み、Phaser シーンへ渡す。
+// Phaser バトル本実装の React ホスト。store の編成 + 選択ステージでエンジンを組み、
+// Phaser シーンへ渡す。クリア記録/初回報酬/スカウト永続/結果オーバーレイは React 側。
 import { useEffect, useReducer, useRef, useState } from 'react'
 import Phaser from 'phaser'
 import { Battle } from '../battle/engine'
 import { makeParty, makeUnitFromOwned } from '../battle/setup'
-import type { UnitInit } from '../battle/types'
-import { partyMonsters, useStore } from '../state/store'
+import {
+  levelUpMonster, markCleared, markSeen, partyMonsters, recruitSpecies, useStore,
+} from '../state/store'
+import type { StageDef } from '../stages/stages'
 import { BattleScene } from '../phaserBattle/BattleScene'
 import './PhaserBattle.css'
 
-// PoC 用のやさしい敵（手触り確認向け）
-const DEMO_ENEMIES: UnitInit[] = [
-  { speciesId: 2, slot: 0, level: 6, side: 'enemy' }, // トゲリス
-  { speciesId: 19, slot: 1, level: 6, side: 'enemy' }, // ピヨット
-  { speciesId: 10, slot: 2, level: 5, side: 'enemy' }, // フタバナ
-]
+const RECRUIT_LEVEL = 5
 
-function buildBattle(): Battle {
-  const allies = partyMonsters().slice(0, 4).map((m, i) => makeUnitFromOwned(m, i))
-  const enemies = makeParty(DEMO_ENEMIES)
-  return Battle.fromUnits([...allies, ...enemies], 'phaser-poc')
+interface Props {
+  stage: StageDef
+  onExit: () => void
 }
 
-export default function PhaserBattle() {
+export default function PhaserBattle({ stage, onExit }: Props) {
   useStore()
   const party = partyMonsters()
   const hostRef = useRef<HTMLDivElement>(null)
-  const gameRef = useRef<Phaser.Game | null>(null)
+  const battleRef = useRef<Battle | null>(null)
   const [outcome, setOutcome] = useState<'win' | 'lose' | null>(null)
+  const [reward, setReward] = useState<string | null>(null)
   const [runKey, restart] = useReducer((x) => x + 1, 0)
 
   useEffect(() => {
     if (!hostRef.current || party.length === 0) return
     setOutcome(null)
-    const battle = buildBattle()
-    const scene = new BattleScene({ battle, onEnd: (o) => setOutcome(o) })
+    setReward(null)
+    markSeen(stage.enemies.map((e) => e.speciesId))
+
+    const allies = partyMonsters().slice(0, 4).map((m, i) => makeUnitFromOwned(m, i))
+    const enemies = makeParty(stage.enemies)
+    const battle = Battle.fromUnits([...allies, ...enemies], `${stage.id}-${runKey}`)
+    battleRef.current = battle
+
+    const scene = new BattleScene({
+      battle,
+      onRecruit: (speciesId) => recruitSpecies(speciesId, RECRUIT_LEVEL),
+      onEnd: (o) => {
+        setOutcome(o)
+        if (o === 'win') {
+          const first = markCleared(stage.id)
+          if (first) {
+            partyMonsters().forEach((m) => levelUpMonster(m.uid))
+            setReward('初クリア報酬: 編成メンバーが成長した！')
+          }
+        }
+      },
+    })
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: hostRef.current,
@@ -44,27 +62,57 @@ export default function PhaserBattle() {
       scene,
       audio: { noAudio: true },
     })
-    gameRef.current = game
-    return () => {
-      game.destroy(true)
-      gameRef.current = null
-    }
+    return () => game.destroy(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runKey])
 
   if (party.length === 0) {
-    return <div className="pb-empty">「そだてる」タブで編成にコドモナを入れてね</div>
+    return (
+      <div className="phaser-battle">
+        <StageBar stage={stage} onExit={onExit} />
+        <div className="pb-empty">「そだてる」タブで編成にコドモナを入れてね（最大4体）</div>
+      </div>
+    )
   }
+
+  const recruited = battleRef.current?.recruited ?? []
 
   return (
     <div className="phaser-battle">
-      <div className="pb-note">✨ Phaser 4 バトル PoC（演出の手触り確認用・別実装）</div>
+      <StageBar stage={stage} onExit={onExit} />
       <div ref={hostRef} className="pb-host" />
       {outcome && (
-        <button className="pb-restart" onClick={() => restart()}>
-          もう一度
-        </button>
+        <div className={`pb-overlay ${outcome}`}>
+          {reward && <div className="pb-reward">{reward}</div>}
+          {recruited.length > 0 && (
+            <div className="pb-recruit">
+              🤝 なかま: {recruited.map((u) => u.name).join('・')}
+            </div>
+          )}
+          <div className="pb-overlay-btns">
+            <button className="pb-btn ghost" onClick={() => restart()}>
+              もう一度
+            </button>
+            <button className="pb-btn" onClick={onExit}>
+              ステージへ
+            </button>
+          </div>
+        </div>
       )}
+    </div>
+  )
+}
+
+function StageBar({ stage, onExit }: Props) {
+  return (
+    <div className="pb-stagebar">
+      <button className="pb-back" onClick={onExit}>
+        ← もどる
+      </button>
+      <span>
+        {stage.boss ? '👑 ' : ''}
+        {stage.title}（推奨Lv{stage.recommendedLv}）
+      </span>
     </div>
   )
 }
