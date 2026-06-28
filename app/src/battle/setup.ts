@@ -84,6 +84,11 @@ export function makeUnit(init: UnitInit): BattleUnit {
     reel: toRuntimeReel(sp),
     statuses: [],
     alive: true,
+    gimmicks: init.gimmicks,
+    phase: init.boss ? 1 : undefined,
+    shiftCycle: init.shiftCycle,
+    minionSpeciesId: init.minionSpeciesId,
+    minionLevel: init.minionLevel,
   }
 }
 

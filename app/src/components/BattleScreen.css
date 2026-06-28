@@ -162,6 +162,15 @@
   color: #ffca28;
   margin-right: 1px;
 }
+.u-phase {
+  font-size: 9px;
+  font-weight: 800;
+  color: #1b2240;
+  background: #ff8a65;
+  border-radius: 4px;
+  padding: 0 4px;
+  margin-right: 3px;
+}
 .u-attr {
   font-size: 10px;
   color: #9aa3c8;

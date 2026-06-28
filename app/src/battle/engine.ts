@@ -7,7 +7,7 @@ import { ATTRIBUTE_LABEL } from './attributes'
 import { computeDamage, effStat, hasStatus, hitChance } from './formulas'
 import { resolveSkill, type SkillDef, type TargetShape } from './skills'
 import { enemyPanelIndex, pickAttackTarget, pickWoundedAlly } from './ai'
-import { makeParty } from './setup'
+import { makeParty, makeUnit } from './setup'
 import { GAUGE_MAX, scoutFactors, type ScoutFactors } from './scout'
 import type { BattleEvent, BattleUnit, Outcome, Side, StatusInstance, StatusKind, UnitInit } from './types'
 
@@ -35,6 +35,7 @@ export class Battle {
   bonds!: Record<string, number> // 敵uid→絆ポイント(失敗で蓄積)
   recruited!: BattleUnit[] // スカウト成功した仲間
   private rng!: Rng
+  private summonCount = 0
 
   constructor(allyInits: UnitInit[], enemyInits: UnitInit[], seed: string | number = 'battle') {
     this.setup([...makeParty(allyInits), ...makeParty(enemyInits)], seed)
@@ -96,7 +97,7 @@ export class Battle {
   private startRound(): BattleEvent[] {
     this.round += 1
     this.queue = this.buildOrder()
-    return [
+    const events: BattleEvent[] = [
       {
         t: 'roundStart',
         round: this.round,
@@ -104,6 +105,50 @@ export class Battle {
         text: `── ラウンド ${this.round} ──`,
       },
     ]
+    this.processBossGimmicks(events)
+    return events
+  }
+
+  /** ボスギミック処理（設計書5-11）: 属性シフト / フェーズ移行(怒り) / とりまき召喚 */
+  private processBossGimmicks(events: BattleEvent[]): void {
+    for (const u of this.aliveOf('enemy')) {
+      if (!u.gimmicks || u.gimmicks.length === 0) continue
+
+      // 属性シフト: ラウンドごとに弱点属性が巡回 → 柔軟な編成を要求
+      if (u.gimmicks.includes('attributeShift') && u.shiftCycle && u.shiftCycle.length > 0 && this.round > 1) {
+        const next = u.shiftCycle[(this.round - 1) % u.shiftCycle.length]
+        if (next !== u.attribute) {
+          u.attribute = next
+          events.push({ t: 'attributeShift', uid: u.uid, attribute: next, text: `${u.name} は属性を ${ATTRIBUTE_LABEL[next]} に変えた！` })
+        }
+      }
+
+      // フェーズ移行: HP割合で3段階。新フェーズ突入で怒り(攻撃UP+加速)＋召喚
+      const ratio = u.hp / u.maxHp
+      const newPhase = ratio > 0.66 ? 1 : ratio > 0.33 ? 2 : 3
+      const cur = u.phase ?? 1
+      if (newPhase > cur) {
+        u.phase = newPhase
+        events.push({ t: 'phaseChange', uid: u.uid, phase: newPhase, text: `${u.name} は本気を出した！（フェーズ${newPhase}）` })
+        this.addStatus(u, { kind: 'atkUp', remaining: 99, magnitude: 1.0 + 0.15 * newPhase })
+        this.addStatus(u, { kind: 'haste', remaining: 99, magnitude: 1.15 })
+        if (u.gimmicks.includes('summon')) this.summonMinion(u, events)
+      }
+    }
+  }
+
+  private summonMinion(boss: BattleUnit, events: BattleEvent[]): void {
+    if (this.aliveOf('enemy').length >= 4 || !boss.minionSpeciesId) return
+    this.summonCount += 1
+    const unit = makeUnit({
+      speciesId: boss.minionSpeciesId,
+      level: boss.minionLevel ?? 5,
+      side: 'enemy',
+      slot: 80 + this.summonCount, // 既存スロットと衝突しない
+    })
+    this.units.push(unit)
+    this.queue.push(unit.uid) // このラウンドの行動キュー末尾に追加
+    events.push({ t: 'summon', uid: boss.uid, name: unit.name, text: `${boss.name} は ${unit.name} を呼び寄せた！` })
   }
 
   /** 手番を1つ進める。空ならラウンド更新。 */

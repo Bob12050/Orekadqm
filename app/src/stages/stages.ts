@@ -35,7 +35,17 @@ interface RawChapter {
   area: string
   mainFamilies: string[]
   recommendedPower: { avgLv: string; minRank: string }
-  boss: { name: string; family: string; attribute: string }
+  boss: { name: string; family: string; attribute: string; gimmick?: string }
+}
+
+const SHIFT_CYCLE = ['fire', 'water', 'wind', 'earth'] as const
+
+/** ボスの説明文からギミックを推定（全ボスにフェーズあり） */
+function parseGimmicks(text: string): string[] {
+  const g = ['phases']
+  if (/召喚|とりまき/.test(text)) g.push('summon')
+  if (/シフト|属性(を|変化)|弱点属性/.test(text)) g.push('attributeShift')
+  return g
 }
 
 const RAW: RawChapter[] = (chaptersData as { chapters: RawChapter[] }).chapters
@@ -81,6 +91,13 @@ function bossEnemies(
     .filter((s) => s.family === ch.boss.family)
     .sort((a, b) => RANK_ORDER.indexOf(b.rank) - RANK_ORDER.indexOf(a.rank))
   const bossSpecies = bossPool[0] ?? pick(rng, speciesInFamilies(ch.mainFamilies))
+  const minionPool = speciesInFamilies(ch.mainFamilies)
+  const minionId = pick(rng, minionPool).id
+  const gimmicks = parseGimmicks(ch.boss.gimmick ?? '')
+  // 属性シフトはボス属性を起点に4属性を巡回
+  const startIdx = Math.max(0, SHIFT_CYCLE.indexOf(ch.boss.attribute as (typeof SHIFT_CYCLE)[number]))
+  const shiftCycle = SHIFT_CYCLE.map((_, i) => SHIFT_CYCLE[(startIdx + i) % SHIFT_CYCLE.length])
+
   const enemies: UnitInit[] = [
     {
       speciesId: bossSpecies.id,
@@ -90,9 +107,12 @@ function bossEnemies(
       boss: true,
       hpMultiplier: 3 + ch.id * 0.3,
       name: ch.boss.name,
+      gimmicks,
+      shiftCycle: gimmicks.includes('attributeShift') ? (shiftCycle as never) : undefined,
+      minionSpeciesId: gimmicks.includes('summon') ? minionId : undefined,
+      minionLevel: level,
     },
   ]
-  const minionPool = speciesInFamilies(ch.mainFamilies)
   for (let i = 0; i < minions; i++) {
     enemies.push({ speciesId: pick(rng, minionPool).id, level, side: 'enemy', slot: i + 1 })
   }

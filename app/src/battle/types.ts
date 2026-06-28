@@ -52,6 +52,12 @@ export interface BattleUnit {
   statuses: StatusInstance[]
   alive: boolean
   awakened?: boolean
+  // ボスギミック（設計書 5-11）
+  gimmicks?: string[] // 'phases' | 'attributeShift' | 'summon'
+  phase?: number
+  shiftCycle?: Attribute[]
+  minionSpeciesId?: number
+  minionLevel?: number
 }
 
 export type Outcome = 'ongoing' | 'win' | 'lose'
@@ -80,6 +86,9 @@ export type BattleEvent =
   | { t: 'drain'; uid: string; amount: number; text: string }
   | { t: 'poisonTick'; uid: string; amount: number; text: string }
   | { t: 'faint'; uid: string; text: string }
+  | { t: 'phaseChange'; uid: string; phase: number; text: string }
+  | { t: 'attributeShift'; uid: string; attribute: Attribute; text: string }
+  | { t: 'summon'; uid: string; name: string; text: string }
   | { t: 'scoutAttempt'; uid: string; target: string; chance: number; text: string }
   | { t: 'scoutSuccess'; target: string; name: string; text: string }
   | { t: 'scoutFail'; target: string; bond: number; text: string }
@@ -93,4 +102,8 @@ export interface UnitInit {
   boss?: boolean // true ならスカウト不可（設計書 5-11 / 6-6）
   hpMultiplier?: number // ボスのHP倍率
   name?: string // 表示名の上書き（ボス名など）
+  gimmicks?: string[]
+  shiftCycle?: Attribute[]
+  minionSpeciesId?: number
+  minionLevel?: number
 }

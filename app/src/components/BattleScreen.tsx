@@ -305,6 +305,7 @@ function UnitCard({
       {targeted && <span className="u-lock">⊙</span>}
       <div className="u-name">
         {u.awakened && <span className="u-awk">✦</span>}
+        {u.gimmicks?.includes('phases') && <span className="u-phase">👑P{u.phase ?? 1}</span>}
         {u.name} <span className="u-attr">{ATTRIBUTE_LABEL[u.attribute]}</span>
       </div>
       <div className="u-hpbar">
