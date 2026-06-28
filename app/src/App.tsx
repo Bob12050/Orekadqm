@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import BattleScreen from './components/BattleScreen'
 import { VerticalReel, type VerticalReelHandle } from './components/VerticalReel'
 import { categoryLabel, stars } from './components/display'
 import { getSpeciesById, poolForFamily, rareJumpChance, species, toRuntimeReel } from './data/monsters'
@@ -24,6 +25,7 @@ export default function App() {
   const [lastMutation, setLastMutation] = useState<{ index: number; before: Panel } | null>(null)
   const [manualRunning, setManualRunning] = useState(false)
 
+  const [view, setView] = useState<'reel' | 'battle'>('reel')
   const reelRef = useRef<VerticalReelHandle>(null)
 
   // シード付き RNG（スピンごと・レベルアップごとに進める）。同シード→同結果で再現可能。
@@ -128,9 +130,22 @@ export default function App() {
     <div className="app">
       <header className="app-head">
         <h1>コドモナ・サーガ</h1>
-        <p className="sub">縦式リール プロトタイプ ｜ オレカ式ランダム成長</p>
+        <p className="sub">プロトタイプ ｜ 縦式リール＋4対4バトルエンジン</p>
       </header>
 
+      <div className="view-tabs">
+        <button className={view === 'reel' ? 'on' : ''} onClick={() => setView('reel')}>
+          リール育成
+        </button>
+        <button className={view === 'battle' ? 'on' : ''} onClick={() => setView('battle')}>
+          4対4バトル
+        </button>
+      </div>
+
+      {view === 'battle' && <BattleScreen />}
+
+      {view === 'reel' && (
+      <>
       <section className="picker">
         <label>
           コドモナ
@@ -229,6 +244,8 @@ export default function App() {
           </ul>
         )}
       </section>
+      </>
+      )}
 
       <footer className="foot">
         データ源: <code>/data/monsters.json</code>（単一ソース）｜ 仕様: <code>docs/design-decisions.md</code> DD-001

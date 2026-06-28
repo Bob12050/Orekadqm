@@ -22,6 +22,26 @@
   color: #98a2c8;
 }
 
+.view-tabs {
+  display: flex;
+  gap: 8px;
+}
+.view-tabs button {
+  flex: 1;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid #2c3566;
+  background: #131838;
+  color: #b9c2ea;
+  font-size: 15px;
+  font-weight: 700;
+}
+.view-tabs button.on {
+  background: linear-gradient(180deg, #2a356e, #1d265a);
+  color: #fff;
+  border-color: #4a5aa8;
+}
+
 .picker {
   display: flex;
   flex-direction: column;
