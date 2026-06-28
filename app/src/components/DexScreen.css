@@ -1,0 +1,200 @@
+.dex {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dex-summary {
+  background: #131838;
+  border: 1px solid #2c3566;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+}
+.dex-summary b {
+  color: #ffd54f;
+  font-size: 18px;
+}
+.dex-sub {
+  font-size: 12px;
+  color: #9aa3c8;
+  margin-top: 2px;
+}
+.dex-bar {
+  position: relative;
+  height: 9px;
+  margin-top: 8px;
+  border-radius: 5px;
+  background: #0c1024;
+  overflow: hidden;
+}
+.dex-bar i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 5px;
+}
+.dex-bar i.seen {
+  background: #44557e;
+}
+.dex-bar i.owned {
+  background: linear-gradient(90deg, #ffca28, #ff7043);
+}
+
+.dex-filter {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+}
+.dex-filter button {
+  padding: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #2c3566;
+  background: #131838;
+  color: #cdd5f5;
+  font-size: 13px;
+}
+.dex-filter button.on {
+  background: #2a356e;
+  color: #fff;
+  border-color: #4a5aa8;
+}
+
+.dex-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.dex-card {
+  position: relative;
+  text-align: left;
+  border: 1px solid #2c3566;
+  background: #161c3a;
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: #eef1ff;
+  min-height: 58px;
+  border-left-width: 4px;
+}
+.dex-card.unknown {
+  opacity: 0.5;
+  border-left-color: #2c3566;
+}
+.dex-card.seen {
+  border-left-color: #44557e;
+}
+.dex-card.owned {
+  border-left-color: #ffca28;
+}
+.dex-no {
+  font-size: 10px;
+  color: #6c769c;
+}
+.dex-name {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+.dex-tags {
+  font-size: 11px;
+  color: #9aa3c8;
+}
+.dex-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+.dex-badge.owned {
+  color: #1b2240;
+  background: #ffd54f;
+}
+.dex-badge.seen {
+  color: #cdd5f5;
+  background: #3a4a8c;
+}
+
+/* family の左帯色 */
+.fam-beast { border-left-color: #ff7043; }
+.fam-dragon { border-left-color: #ef5350; }
+.fam-magic { border-left-color: #ab47bc; }
+.fam-plant { border-left-color: #9ccc65; }
+.fam-material { border-left-color: #8d99ae; }
+.fam-aqua { border-left-color: #42a5f5; }
+.fam-bird { border-left-color: #4dd0e1; }
+.fam-demon { border-left-color: #c2185b; }
+.fam-spirit { border-left-color: #fff176; }
+.fam-machine { border-left-color: #26c6da; }
+
+/* 詳細 */
+.dex-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dex-back {
+  align-self: flex-start;
+  background: #1d265a;
+  border: 1px solid #3a4a8c;
+  color: #cdd5f5;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+}
+.dex-hero {
+  text-align: center;
+  border-radius: 14px;
+  padding: 18px 12px;
+  background: #11162e;
+  border: 1px solid #2c3566;
+  border-top-width: 4px;
+}
+.dex-hero-no {
+  font-size: 12px;
+  color: #6c769c;
+}
+.dex-hero-name {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffd54f;
+}
+.dex-hero-meta {
+  font-size: 13px;
+  color: #cdd5f5;
+}
+.dex-hero-role {
+  font-size: 12px;
+  color: #9aa3c8;
+  margin-top: 2px;
+}
+.dex-hero .dex-badge {
+  position: static;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.dex-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dex-row {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 10px;
+  font-size: 13px;
+  padding: 8px 10px;
+  background: #161c3a;
+  border: 1px solid #2c3566;
+  border-radius: 10px;
+}
+.dex-k {
+  color: #9aa3c8;
+}
+.dex-v {
+  color: #eef1ff;
+}

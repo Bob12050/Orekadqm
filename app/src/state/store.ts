@@ -7,10 +7,12 @@ import { poolForFamily, rareJumpChance } from '../data/monsters'
 import { getSpeciesById } from '../data/monsters'
 import { createRng } from '../reel/seededRng'
 
+export type DexState = 'seen' | 'owned'
+
 export interface StoreState {
   monsters: OwnedMonster[]
   party: string[] // 出撃uid（最大4）
-  dex: number[] // 発見/入手済みの speciesId
+  dex: Record<number, DexState> // 図鑑: speciesId → 発見(seen)/入手(owned)
   cleared: Record<string, boolean> // クリア済みステージID
 }
 
@@ -21,10 +23,12 @@ const STARTER_IDS = [1, 7, 16, 13, 2, 4, 10, 19] // モコル/ポフィム/プ�
 
 function seed(): StoreState {
   const monsters = STARTER_IDS.map((id, i) => createOwned(id, 6 + (i % 3)))
+  const dex: Record<number, DexState> = {}
+  STARTER_IDS.forEach((id) => (dex[id] = 'owned'))
   return {
     monsters,
     party: monsters.slice(0, 4).map((m) => m.uid),
-    dex: Array.from(new Set(STARTER_IDS)),
+    dex,
     cleared: {},
   }
 }
@@ -35,7 +39,14 @@ function load(): StoreState {
     if (raw) {
       const parsed = JSON.parse(raw) as StoreState
       if (parsed && Array.isArray(parsed.monsters)) {
-        return { ...parsed, cleared: parsed.cleared ?? {} } // 旧データの移行
+        // 旧データの移行（dex が number[] / cleared 未定義）
+        let dex = parsed.dex
+        if (Array.isArray(dex)) {
+          const conv: Record<number, DexState> = {}
+          ;(dex as number[]).forEach((id) => (conv[id] = 'owned'))
+          dex = conv
+        }
+        return { ...parsed, dex: dex ?? {}, cleared: parsed.cleared ?? {} }
       }
     }
   } catch {
@@ -76,8 +87,20 @@ export function getMonster(uid: string): OwnedMonster | undefined {
 }
 
 export function addMonster(m: OwnedMonster): void {
-  const dex = state.dex.includes(m.speciesId) ? state.dex : [...state.dex, m.speciesId]
-  commit({ ...state, monsters: [...state.monsters, m], dex })
+  commit({ ...state, monsters: [...state.monsters, m], dex: { ...state.dex, [m.speciesId]: 'owned' } })
+}
+
+/** 遭遇した種を図鑑に「発見」登録（入手済みは降格しない） */
+export function markSeen(speciesIds: number[]): void {
+  let changed = false
+  const dex = { ...state.dex }
+  for (const id of speciesIds) {
+    if (!dex[id]) {
+      dex[id] = 'seen'
+      changed = true
+    }
+  }
+  if (changed) commit({ ...state, dex })
 }
 
 export function removeMonsters(uids: string[]): void {

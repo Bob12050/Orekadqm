@@ -6,7 +6,7 @@ import { ATTRIBUTE_LABEL } from '../battle/attributes'
 import { GAUGE_MAX, scoutStars } from '../battle/scout'
 import { makeParty, makeUnitFromOwned } from '../battle/setup'
 import type { BattleEvent, BattleUnit } from '../battle/types'
-import { markCleared, levelUpMonster, partyMonsters, recruitSpecies, useStore } from '../state/store'
+import { markCleared, markSeen, levelUpMonster, partyMonsters, recruitSpecies, useStore } from '../state/store'
 import type { StageDef } from '../stages/stages'
 import { VerticalReel, type VerticalReelHandle } from './VerticalReel'
 import './BattleScreen.css'
@@ -43,6 +43,11 @@ export default function BattleScreen({ stage, onExit }: Props) {
   const reelRef = useRef<VerticalReelHandle>(null)
   const busyRef = useRef(false)
   const rewardedRef = useRef(false)
+
+  // ステージ突入で敵を図鑑に「発見」登録
+  useEffect(() => {
+    markSeen(stage.enemies.map((e) => e.speciesId))
+  }, [stage.id, stage.enemies])
 
   // 勝利時: クリア記録＋初回報酬（編成メンバーが1レベルずつ成長）
   useEffect(() => {

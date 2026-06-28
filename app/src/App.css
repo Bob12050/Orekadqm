@@ -28,13 +28,14 @@
 }
 .view-tabs button {
   flex: 1;
-  padding: 11px;
+  padding: 11px 4px;
   border-radius: 12px;
   border: 1px solid #2c3566;
   background: #131838;
   color: #b9c2ea;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
+  white-space: nowrap;
 }
 .view-tabs button.on {
   background: linear-gradient(180deg, #2a356e, #1d265a);
