@@ -4,6 +4,14 @@
   gap: 10px;
 }
 
+.b-empty {
+  text-align: center;
+  color: #98a2c8;
+  font-size: 14px;
+  padding: 40px 16px;
+  line-height: 1.7;
+}
+
 .b-round {
   text-align: center;
   font-size: 13px;

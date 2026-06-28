@@ -27,17 +27,34 @@ const STATUS_LABEL: Record<StatusKind, string> = {
 }
 
 export class Battle {
-  units: BattleUnit[]
-  round = 0
-  queue: string[] = []
-  outcome: Outcome = 'ongoing'
-  scoutGauge = 0 // 共通スカウトゲージ(0..GAUGE_MAX)
-  bonds: Record<string, number> = {} // 敵uid→絆ポイント(失敗で蓄積)
-  recruited: BattleUnit[] = [] // スカウト成功した仲間
-  private rng: Rng
+  units!: BattleUnit[]
+  round!: number
+  queue!: string[]
+  outcome!: Outcome
+  scoutGauge!: number // 共通スカウトゲージ(0..GAUGE_MAX)
+  bonds!: Record<string, number> // 敵uid→絆ポイント(失敗で蓄積)
+  recruited!: BattleUnit[] // スカウト成功した仲間
+  private rng!: Rng
 
   constructor(allyInits: UnitInit[], enemyInits: UnitInit[], seed: string | number = 'battle') {
-    this.units = [...makeParty(allyInits), ...makeParty(enemyInits)]
+    this.setup([...makeParty(allyInits), ...makeParty(enemyInits)], seed)
+  }
+
+  /** 事前生成したユニット配列から直接構築（所持個体の育ったリールを持ち込む用） */
+  static fromUnits(units: BattleUnit[], seed: string | number = 'battle'): Battle {
+    const b: Battle = Object.create(Battle.prototype)
+    b.setup(units, seed)
+    return b
+  }
+
+  private setup(units: BattleUnit[], seed: string | number): void {
+    this.units = units
+    this.round = 0
+    this.queue = []
+    this.outcome = 'ongoing'
+    this.scoutGauge = 0
+    this.bonds = {}
+    this.recruited = []
     this.rng = createRng(seed)
     this.startRound()
   }

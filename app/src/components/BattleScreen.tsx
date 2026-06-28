@@ -4,26 +4,34 @@ import { useEffect, useReducer, useRef, useState } from 'react'
 import { Battle } from '../battle/engine'
 import { ATTRIBUTE_LABEL } from '../battle/attributes'
 import { GAUGE_MAX, scoutStars } from '../battle/scout'
+import { makeParty, makeUnitFromOwned } from '../battle/setup'
 import type { BattleEvent, BattleUnit, UnitInit } from '../battle/types'
+import { partyMonsters, recruitSpecies, useStore } from '../state/store'
 import { VerticalReel, type VerticalReelHandle } from './VerticalReel'
 import './BattleScreen.css'
 
-const ALLIES: UnitInit[] = [
-  { speciesId: 1, slot: 0, level: 10, side: 'ally' }, // モコル
-  { speciesId: 7, slot: 1, level: 10, side: 'ally' }, // ポフィム(回復)
-  { speciesId: 16, slot: 2, level: 10, side: 'ally' }, // プカリオ
-  { speciesId: 13, slot: 3, level: 10, side: 'ally' }, // コロリン(壁)
-]
+// デモの敵編成（章コンテンツが入るまでの固定ステージ）
 const ENEMIES: UnitInit[] = [
   { speciesId: 2, slot: 0, level: 7, side: 'enemy' }, // トゲリス(scout★2)
   { speciesId: 13, slot: 1, level: 9, side: 'enemy' }, // コロリン(タンク, scout★1=スカウト練習向き)
   { speciesId: 19, slot: 2, level: 7, side: 'enemy' }, // ピヨット(scout★1)
 ]
+const RECRUIT_LEVEL = 5
+
+function buildBattle(seed: string): Battle {
+  const allies = partyMonsters()
+    .slice(0, 4)
+    .map((m, i) => makeUnitFromOwned(m, i))
+  const enemies = makeParty(ENEMIES)
+  return Battle.fromUnits([...allies, ...enemies], seed)
+}
 
 export default function BattleScreen() {
+  useStore() // 編成/コレクション変更に追従
+  const party = partyMonsters()
   const seedRef = useRef('arena-1')
   const bRef = useRef<Battle | null>(null)
-  if (!bRef.current) bRef.current = new Battle(ALLIES, ENEMIES, seedRef.current)
+  if (!bRef.current && party.length > 0) bRef.current = buildBattle(seedRef.current)
   const b = bRef.current
 
   const [turnKey, bump] = useReducer((x) => x + 1, 0)
@@ -41,13 +49,13 @@ export default function BattleScreen() {
 
   // ターゲットが倒れたら解除
   useEffect(() => {
-    if (target && !b.get(target)?.alive) setTarget(null)
+    if (b && target && !b.get(target)?.alive) setTarget(null)
   })
 
   // 敵の手番、または全オート時の味方手番を自動進行。
   // 注意: スケジュール前に setState しないこと（再レンダ→cleanupでtimeoutが取消され停止する）。
   useEffect(() => {
-    if (b.outcome !== 'ongoing' || busyRef.current) return
+    if (!b || b.outcome !== 'ongoing' || busyRef.current) return
     const cur = b.current
     if (!cur) return
     if (cur.side === 'enemy') {
@@ -72,7 +80,7 @@ export default function BattleScreen() {
   }, [turnKey, auto])
 
   function doSpin() {
-    if (busyRef.current || b.outcome !== 'ongoing') return
+    if (!b || busyRef.current || b.outcome !== 'ongoing') return
     const cur = b.current
     if (!cur || cur.side !== 'ally') return
     busyRef.current = true
@@ -88,26 +96,38 @@ export default function BattleScreen() {
   }
 
   function doScout() {
-    if (busyRef.current || !target || !b.canScout(target)) return
+    if (!b || busyRef.current || !target || !b.canScout(target)) return
+    const foe = b.get(target)
     busyRef.current = true
     setBusy(true)
     // 演出: スカウトは手番を消費（リールは回さない）
     const ev = b.takeAllyScout(target)
     pushEvents(ev)
-    if (ev.some((e) => e.t === 'scoutSuccess')) setTarget(null)
+    if (ev.some((e) => e.t === 'scoutSuccess') && foe) {
+      recruitSpecies(foe.speciesId, RECRUIT_LEVEL) // コレクションへ永続追加
+      setTarget(null)
+    }
     busyRef.current = false
     setBusy(false)
     bump()
   }
 
   function reset() {
-    bRef.current = new Battle(ALLIES, ENEMIES, seedRef.current + ':' + Math.floor(performance.now()))
+    bRef.current = buildBattle(seedRef.current + ':' + Math.floor(performance.now()))
     busyRef.current = false
     setBusy(false)
     setTarget(null)
     setAuto(false)
     setLog(['たたかい かいし！'])
     bump()
+  }
+
+  if (!b) {
+    return (
+      <div className="battle">
+        <div className="b-empty">「そだてる」タブで編成にコドモナを入れてね（最大4体）</div>
+      </div>
+    )
   }
 
   const enemies = b.side('enemy')
