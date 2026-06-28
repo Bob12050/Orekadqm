@@ -1,0 +1,118 @@
+.stagesel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ss-warn {
+  font-size: 12px;
+  color: #ffb38a;
+  text-align: center;
+  padding: 8px;
+  background: #2a1d20;
+  border-radius: 8px;
+}
+
+.ss-chapters {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.ss-chip {
+  padding: 9px 0;
+  border-radius: 10px;
+  border: 1px solid #2c3566;
+  background: #131838;
+  color: #cdd5f5;
+  font-size: 13px;
+  font-weight: 700;
+}
+.ss-chip.on {
+  background: linear-gradient(180deg, #2a356e, #1d265a);
+  color: #fff;
+  border-color: #4a5aa8;
+}
+.ss-chip.locked {
+  opacity: 0.45;
+}
+
+.ss-chapter-head {
+  text-align: center;
+}
+.ss-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffd54f;
+}
+.ss-area {
+  font-size: 12px;
+  color: #9aa3c8;
+}
+
+.ss-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ss-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  border: 1px solid #2c3566;
+  background: #161c3a;
+  border-radius: 12px;
+  padding: 12px;
+  color: #eef1ff;
+}
+.ss-stage.boss {
+  border-color: #b06a3a;
+  background: linear-gradient(180deg, #2a1f1a, #1a1530);
+}
+.ss-stage.locked {
+  opacity: 0.45;
+}
+.ss-stage-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.ss-clear {
+  margin-left: 8px;
+  font-size: 11px;
+  color: #ffd54f;
+}
+.ss-stage-sub {
+  font-size: 11px;
+  color: #9aa3c8;
+  margin-top: 2px;
+}
+.ss-stage-fam {
+  display: flex;
+  gap: 4px;
+}
+.ss-fam {
+  font-size: 11px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: #2a3566;
+  color: #dfe6ff;
+}
+.fam-beast { background: #7a3f1f; }
+.fam-dragon { background: #7a2424; }
+.fam-magic { background: #4a2a6e; }
+.fam-plant { background: #2f5a2a; }
+.fam-material { background: #44485a; }
+.fam-aqua { background: #224a6e; }
+.fam-bird { background: #2a5a6e; }
+.fam-demon { background: #4a1f2a; }
+.fam-spirit { background: #6a6a44; }
+.fam-machine { background: #2a5a5a; }
+.ss-lock {
+  position: absolute;
+  right: 12px;
+  font-size: 18px;
+}

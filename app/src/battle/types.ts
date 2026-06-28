@@ -90,4 +90,6 @@ export interface UnitInit {
   side: Side
   slot: number
   boss?: boolean // true ならスカウト不可（設計書 5-11 / 6-6）
+  hpMultiplier?: number // ボスのHP倍率
+  name?: string // 表示名の上書き（ボス名など）
 }

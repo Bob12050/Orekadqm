@@ -5,33 +5,33 @@ import { Battle } from '../battle/engine'
 import { ATTRIBUTE_LABEL } from '../battle/attributes'
 import { GAUGE_MAX, scoutStars } from '../battle/scout'
 import { makeParty, makeUnitFromOwned } from '../battle/setup'
-import type { BattleEvent, BattleUnit, UnitInit } from '../battle/types'
-import { partyMonsters, recruitSpecies, useStore } from '../state/store'
+import type { BattleEvent, BattleUnit } from '../battle/types'
+import { markCleared, levelUpMonster, partyMonsters, recruitSpecies, useStore } from '../state/store'
+import type { StageDef } from '../stages/stages'
 import { VerticalReel, type VerticalReelHandle } from './VerticalReel'
 import './BattleScreen.css'
 
-// デモの敵編成（章コンテンツが入るまでの固定ステージ）
-const ENEMIES: UnitInit[] = [
-  { speciesId: 2, slot: 0, level: 7, side: 'enemy' }, // トゲリス(scout★2)
-  { speciesId: 13, slot: 1, level: 9, side: 'enemy' }, // コロリン(タンク, scout★1=スカウト練習向き)
-  { speciesId: 19, slot: 2, level: 7, side: 'enemy' }, // ピヨット(scout★1)
-]
 const RECRUIT_LEVEL = 5
 
-function buildBattle(seed: string): Battle {
+interface Props {
+  stage: StageDef
+  onExit: () => void
+}
+
+function buildBattle(stage: StageDef, seed: string): Battle {
   const allies = partyMonsters()
     .slice(0, 4)
     .map((m, i) => makeUnitFromOwned(m, i))
-  const enemies = makeParty(ENEMIES)
+  const enemies = makeParty(stage.enemies)
   return Battle.fromUnits([...allies, ...enemies], seed)
 }
 
-export default function BattleScreen() {
+export default function BattleScreen({ stage, onExit }: Props) {
   useStore() // 編成/コレクション変更に追従
   const party = partyMonsters()
-  const seedRef = useRef('arena-1')
+  const seedRef = useRef(`${stage.id}-1`)
   const bRef = useRef<Battle | null>(null)
-  if (!bRef.current && party.length > 0) bRef.current = buildBattle(seedRef.current)
+  if (!bRef.current && party.length > 0) bRef.current = buildBattle(stage, seedRef.current)
   const b = bRef.current
 
   const [turnKey, bump] = useReducer((x) => x + 1, 0)
@@ -39,8 +39,24 @@ export default function BattleScreen() {
   const [target, setTarget] = useState<string | null>(null)
   const [auto, setAuto] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [reward, setReward] = useState<string | null>(null)
   const reelRef = useRef<VerticalReelHandle>(null)
   const busyRef = useRef(false)
+  const rewardedRef = useRef(false)
+
+  // 勝利時: クリア記録＋初回報酬（編成メンバーが1レベルずつ成長）
+  useEffect(() => {
+    if (b && b.outcome === 'win' && !rewardedRef.current) {
+      rewardedRef.current = true
+      const first = markCleared(stage.id)
+      if (first) {
+        party.forEach((m) => levelUpMonster(m.uid))
+        setReward(`初クリア報酬: 編成メンバーが成長した！`)
+      } else {
+        setReward('クリア済みステージ')
+      }
+    }
+  })
 
   const pushEvents = (events: BattleEvent[]) => {
     const lines = events.filter((e) => 'text' in e).map((e) => (e as { text: string }).text)
@@ -113,11 +129,13 @@ export default function BattleScreen() {
   }
 
   function reset() {
-    bRef.current = buildBattle(seedRef.current + ':' + Math.floor(performance.now()))
+    bRef.current = buildBattle(stage, seedRef.current + ':' + Math.floor(performance.now()))
+    rewardedRef.current = false
     busyRef.current = false
     setBusy(false)
     setTarget(null)
     setAuto(false)
+    setReward(null)
     setLog(['たたかい かいし！'])
     bump()
   }
@@ -125,6 +143,12 @@ export default function BattleScreen() {
   if (!b) {
     return (
       <div className="battle">
+        <div className="b-stagebar">
+          <button className="b-back" onClick={onExit}>
+            ← もどる
+          </button>
+          <span>{stage.title}</span>
+        </div>
         <div className="b-empty">「そだてる」タブで編成にコドモナを入れてね（最大4体）</div>
       </div>
     )
@@ -140,6 +164,15 @@ export default function BattleScreen() {
 
   return (
     <div className="battle">
+      <div className="b-stagebar">
+        <button className="b-back" onClick={onExit}>
+          ← もどる
+        </button>
+        <span>
+          {stage.boss && '👑 '}
+          {stage.title}（推奨Lv{stage.recommendedLv}）
+        </span>
+      </div>
       <div className="b-round">
         ラウンド {b.round} ｜ {b.outcome === 'ongoing' ? (isAllyTurn ? `${cur?.name} の番` : '敵の番…') : '—'}
         {b.recruited.length > 0 && <span className="b-recruited">🤝 仲間 {b.recruited.length}</span>}
@@ -211,6 +244,7 @@ export default function BattleScreen() {
         ) : b.outcome !== 'ongoing' ? (
           <div className={`b-result ${b.outcome}`}>
             <div className="b-result-text">{b.outcome === 'win' ? '🏆 WIN！' : '💀 LOSE…'}</div>
+            {reward && <div className="b-reward">{reward}</div>}
             {b.recruited.length > 0 && (
               <div className="b-recruit-list">
                 <div className="b-recruit-head">🤝 なかまになったコドモナ</div>
@@ -221,9 +255,14 @@ export default function BattleScreen() {
                 ))}
               </div>
             )}
-            <button className="b-spin" onClick={reset}>
-              もう一度
-            </button>
+            <div className="b-result-btns">
+              <button className="b-spin ghost" onClick={reset}>
+                もう一度
+              </button>
+              <button className="b-spin" onClick={onExit}>
+                ステージへ
+              </button>
+            </div>
           </div>
         ) : (
           <div className="b-enemy-wait">敵の行動中…</div>

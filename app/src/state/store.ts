@@ -11,6 +11,7 @@ export interface StoreState {
   monsters: OwnedMonster[]
   party: string[] // 出撃uid（最大4）
   dex: number[] // 発見/入手済みの speciesId
+  cleared: Record<string, boolean> // クリア済みステージID
 }
 
 const KEY = 'kodomona-store-v1'
@@ -24,6 +25,7 @@ function seed(): StoreState {
     monsters,
     party: monsters.slice(0, 4).map((m) => m.uid),
     dex: Array.from(new Set(STARTER_IDS)),
+    cleared: {},
   }
 }
 
@@ -32,7 +34,9 @@ function load(): StoreState {
     const raw = localStorage.getItem(KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as StoreState
-      if (parsed && Array.isArray(parsed.monsters)) return parsed
+      if (parsed && Array.isArray(parsed.monsters)) {
+        return { ...parsed, cleared: parsed.cleared ?? {} } // 旧データの移行
+      }
     }
   } catch {
     /* noop */
@@ -140,6 +144,16 @@ export function toggleLockPanel(uid: string, index: number): void {
   updateMonster(uid, {
     reel: m.reel.map((p, i) => (i === index ? { ...p, locked: !p.locked } : p)),
   })
+}
+
+export function markCleared(stageId: string): boolean {
+  const first = !state.cleared[stageId]
+  if (first) commit({ ...state, cleared: { ...state.cleared, [stageId]: true } })
+  return first // 初回クリアなら true
+}
+
+export function isCleared(stageId: string): boolean {
+  return !!state.cleared[stageId]
 }
 
 export function resetStore(): void {

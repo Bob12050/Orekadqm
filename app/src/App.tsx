@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import BattleScreen from './components/BattleScreen'
+import AdventureScreen from './components/AdventureScreen'
 import FusionScreen from './components/FusionScreen'
 import TrainScreen from './components/TrainScreen'
 import './App.css'
 
-type View = 'train' | 'battle' | 'fusion'
+type View = 'train' | 'adventure' | 'fusion'
 
 export default function App() {
   const [view, setView] = useState<View>('train')
@@ -20,8 +20,8 @@ export default function App() {
         <button className={view === 'train' ? 'on' : ''} onClick={() => setView('train')}>
           そだてる
         </button>
-        <button className={view === 'battle' ? 'on' : ''} onClick={() => setView('battle')}>
-          バトル
+        <button className={view === 'adventure' ? 'on' : ''} onClick={() => setView('adventure')}>
+          ぼうけん
         </button>
         <button className={view === 'fusion' ? 'on' : ''} onClick={() => setView('fusion')}>
           配合
@@ -29,7 +29,7 @@ export default function App() {
       </div>
 
       {view === 'train' && <TrainScreen />}
-      {view === 'battle' && <BattleScreen />}
+      {view === 'adventure' && <AdventureScreen />}
       {view === 'fusion' && <FusionScreen />}
 
       <footer className="foot">

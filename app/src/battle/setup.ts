@@ -51,9 +51,10 @@ export function makeUnit(init: UnitInit): BattleUnit {
   const sp = getSpeciesById(init.speciesId)
   if (!sp) throw new Error(`unknown species: ${init.speciesId}`)
   const base = scaledStats(init.speciesId, init.level)
+  const maxHp = Math.round(base.hp * (init.hpMultiplier ?? 1))
   return {
     uid: `${init.side}-${init.slot}`,
-    name: sp.name,
+    name: init.name ?? sp.name,
     speciesId: sp.id,
     side: init.side,
     slot: init.slot,
@@ -64,8 +65,8 @@ export function makeUnit(init: UnitInit): BattleUnit {
     // ボス・配合専用(scout=0)はスカウト不可。味方はスカウト対象外。
     scoutable: init.side === 'enemy' && !init.boss && sp.scout > 0 && !sp.fusionOnly,
     base,
-    hp: base.hp,
-    maxHp: base.hp,
+    hp: maxHp,
+    maxHp,
     reel: toRuntimeReel(sp),
     statuses: [],
     alive: true,

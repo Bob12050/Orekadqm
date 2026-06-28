@@ -4,6 +4,42 @@
   gap: 10px;
 }
 
+.b-stagebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #dfe6ff;
+  padding: 6px 4px;
+}
+.b-back {
+  background: #1d265a;
+  border: 1px solid #3a4a8c;
+  color: #cdd5f5;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.b-reward {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1b2240;
+  background: linear-gradient(90deg, #ffe082, #ffca28);
+  border-radius: 8px;
+  padding: 6px 14px;
+}
+.b-result-btns {
+  display: flex;
+  gap: 10px;
+}
+.b-spin.ghost {
+  background: transparent;
+  border: 1px solid #3a4a8c;
+  color: #cdd5f5;
+  box-shadow: none;
+}
+
 .b-empty {
   text-align: center;
   color: #98a2c8;
