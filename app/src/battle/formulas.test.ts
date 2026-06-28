@@ -6,6 +6,7 @@ import type { BattleUnit, Attribute } from './types'
 function unit(attr: Attribute, over: Partial<BattleUnit['base']> = {}, statuses: BattleUnit['statuses'] = []): BattleUnit {
   return {
     uid: 'u', name: 'u', speciesId: 0, side: 'ally', slot: 0, attribute: attr,
+    family: 'beast', rank: 'F', scoutStar: 3, scoutable: false,
     base: { hp: 100, atk: 40, def: 20, mag: 30, spd: 20, acc: 95, luck: 10, ...over },
     hp: 100, maxHp: 100, reel: [], statuses, alive: true,
   }

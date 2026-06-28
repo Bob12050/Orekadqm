@@ -27,6 +27,11 @@ export function makeUnit(init: UnitInit): BattleUnit {
     side: init.side,
     slot: init.slot,
     attribute: sp.attribute as Attribute,
+    family: sp.family,
+    rank: sp.rank,
+    scoutStar: sp.scout,
+    // ボス・配合専用(scout=0)はスカウト不可。味方はスカウト対象外。
+    scoutable: init.side === 'enemy' && !init.boss && sp.scout > 0 && !sp.fusionOnly,
     base,
     hp: base.hp,
     maxHp: base.hp,

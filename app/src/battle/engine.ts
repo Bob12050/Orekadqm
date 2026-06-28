@@ -8,6 +8,7 @@ import { computeDamage, effStat, hasStatus, hitChance } from './formulas'
 import { resolveSkill, type SkillDef, type TargetShape } from './skills'
 import { enemyPanelIndex, pickAttackTarget, pickWoundedAlly } from './ai'
 import { makeParty } from './setup'
+import { GAUGE_MAX, scoutFactors, type ScoutFactors } from './scout'
 import type { BattleEvent, BattleUnit, Outcome, Side, StatusInstance, StatusKind, UnitInit } from './types'
 
 const STATUS_LABEL: Record<StatusKind, string> = {
@@ -30,6 +31,9 @@ export class Battle {
   round = 0
   queue: string[] = []
   outcome: Outcome = 'ongoing'
+  scoutGauge = 0 // 共通スカウトゲージ(0..GAUGE_MAX)
+  bonds: Record<string, number> = {} // 敵uid→絆ポイント(失敗で蓄積)
+  recruited: BattleUnit[] = [] // スカウト成功した仲間
   private rng: Rng
 
   constructor(allyInits: UnitInit[], enemyInits: UnitInit[], seed: string | number = 'battle') {
@@ -285,6 +289,9 @@ export class Battle {
           actor.hp = Math.min(actor.maxHp, actor.hp + healed)
           events.push({ t: 'drain', uid: actor.uid, amount: actor.hp - before, text: `${actor.name} は ${actor.hp - before} 吸収した` })
         }
+        // スカウトゲージ蓄積（味方が攻撃を当てた／弱点ヒット、味方が被弾）
+        if (actor.side === 'ally') this.fillGauge(dr.effectiveness === 'weak' ? 20 : 12)
+        else if (target.side === 'ally') this.fillGauge(6)
         this.faintIfDead(target, events)
       }
     }
@@ -298,8 +305,69 @@ export class Battle {
           magnitude: skill.status.magnitude ?? 1,
         })
         events.push({ t: 'status', uid: actor.uid, target: target.uid, kind: skill.status.kind, text: `${target.name} は ${STATUS_LABEL[skill.status.kind]}状態` })
+        if (actor.side === 'ally') this.fillGauge(6)
       }
     }
+  }
+
+  private fillGauge(amount: number): void {
+    this.scoutGauge = Math.min(GAUGE_MAX, this.scoutGauge + amount)
+  }
+
+  // ---- スカウト（設計書6章） ----
+  get gaugeReady(): boolean {
+    return this.scoutGauge >= GAUGE_MAX
+  }
+
+  /** 対象の成功率内訳（UI表示用） */
+  scoutFactorsFor(uid: string): ScoutFactors | null {
+    const t = this.get(uid)
+    if (!t) return null
+    return scoutFactors(t, this.bonds[uid] ?? 0)
+  }
+
+  scoutChanceFor(uid: string): number {
+    return this.scoutFactorsFor(uid)?.chance ?? 0
+  }
+
+  /** その敵を今スカウトできるか（ゲージ満タン＆スカウト可能＆敵＆生存） */
+  canScout(uid: string): boolean {
+    if (!this.gaugeReady || this.outcome !== 'ongoing') return false
+    if (!this.isAllyTurn()) return false
+    const t = this.get(uid)
+    return !!t && t.alive && t.side === 'enemy' && t.scoutable
+  }
+
+  /** 味方の手番でスカウトを試みる（手番を消費）。 */
+  takeAllyScout(targetUid: string): BattleEvent[] {
+    const events: BattleEvent[] = []
+    const actor = this.current
+    const target = this.get(targetUid)
+    if (!actor || actor.side !== 'ally' || !target || !this.canScout(targetUid)) {
+      return events
+    }
+    events.push({ t: 'turnStart', uid: actor.uid, text: `${actor.name} の手番` })
+    const f = scoutFactors(target, this.bonds[targetUid] ?? 0)
+    this.scoutGauge = 0 // ゲージ消費
+    events.push({ t: 'scoutAttempt', uid: actor.uid, target: targetUid, chance: f.chance, text: `${actor.name} は ${target.name} にスカウトアタック！（成功率${Math.round(f.chance * 100)}%）` })
+
+    if (this.rng() < f.chance) {
+      // 成功：仲間化（フィールドから去り recruited へ）
+      this.recruited.push(target)
+      this.units = this.units.filter((u) => u.uid !== targetUid)
+      this.queue = this.queue.filter((uid) => uid !== targetUid)
+      events.push({ t: 'scoutSuccess', target: targetUid, name: target.name, text: `${target.name} は なかまになった！` })
+    } else {
+      // 失敗：絆ポイント+1（次回成功率UP）＋対象が怒る（攻撃UP）＝軽いリスク
+      this.bonds[targetUid] = (this.bonds[targetUid] ?? 0) + 1
+      this.addStatus(target, { kind: 'atkUp', remaining: 2, magnitude: 1.2 })
+      events.push({ t: 'scoutFail', target: targetUid, bond: this.bonds[targetUid], text: `スカウト失敗… ${target.name} は怒っている（絆+1で次は成功しやすい）` })
+    }
+
+    this.endOfTurn(actor, events)
+    this.checkOutcome(events)
+    this.advance(events)
+    return events
   }
 
   // ---- 状態異常 ----

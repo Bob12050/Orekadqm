@@ -3,20 +3,21 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
 import { Battle } from '../battle/engine'
 import { ATTRIBUTE_LABEL } from '../battle/attributes'
+import { GAUGE_MAX, scoutStars } from '../battle/scout'
 import type { BattleEvent, BattleUnit, UnitInit } from '../battle/types'
 import { VerticalReel, type VerticalReelHandle } from './VerticalReel'
 import './BattleScreen.css'
 
 const ALLIES: UnitInit[] = [
-  { speciesId: 1, slot: 0, level: 8, side: 'ally' }, // モコル
-  { speciesId: 7, slot: 1, level: 8, side: 'ally' }, // ポフィム(回復)
-  { speciesId: 16, slot: 2, level: 8, side: 'ally' }, // プカリオ
-  { speciesId: 13, slot: 3, level: 8, side: 'ally' }, // コロリン(壁)
+  { speciesId: 1, slot: 0, level: 10, side: 'ally' }, // モコル
+  { speciesId: 7, slot: 1, level: 10, side: 'ally' }, // ポフィム(回復)
+  { speciesId: 16, slot: 2, level: 10, side: 'ally' }, // プカリオ
+  { speciesId: 13, slot: 3, level: 10, side: 'ally' }, // コロリン(壁)
 ]
 const ENEMIES: UnitInit[] = [
-  { speciesId: 2, slot: 0, level: 6, side: 'enemy' }, // トゲリス
-  { speciesId: 19, slot: 1, level: 6, side: 'enemy' }, // ピヨット
-  { speciesId: 10, slot: 2, level: 5, side: 'enemy' }, // フタバナ
+  { speciesId: 2, slot: 0, level: 7, side: 'enemy' }, // トゲリス(scout★2)
+  { speciesId: 13, slot: 1, level: 9, side: 'enemy' }, // コロリン(タンク, scout★1=スカウト練習向き)
+  { speciesId: 19, slot: 2, level: 7, side: 'enemy' }, // ピヨット(scout★1)
 ]
 
 export default function BattleScreen() {
@@ -25,7 +26,7 @@ export default function BattleScreen() {
   if (!bRef.current) bRef.current = new Battle(ALLIES, ENEMIES, seedRef.current)
   const b = bRef.current
 
-  const [, bump] = useReducer((x) => x + 1, 0)
+  const [turnKey, bump] = useReducer((x) => x + 1, 0)
   const [log, setLog] = useState<string[]>(['たたかい かいし！'])
   const [target, setTarget] = useState<string | null>(null)
   const [auto, setAuto] = useState(false)
@@ -65,7 +66,10 @@ export default function BattleScreen() {
       const id = setTimeout(() => doSpin(), 450)
       return () => clearTimeout(id)
     }
-  })
+    // turnKey(手番が解決するたび増加)と auto のみに依存。
+    // target 等の無関係な再レンダで敵手番のtimeoutを取り消さないため。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turnKey, auto])
 
   function doSpin() {
     if (busyRef.current || b.outcome !== 'ongoing') return
@@ -83,6 +87,19 @@ export default function BattleScreen() {
     })
   }
 
+  function doScout() {
+    if (busyRef.current || !target || !b.canScout(target)) return
+    busyRef.current = true
+    setBusy(true)
+    // 演出: スカウトは手番を消費（リールは回さない）
+    const ev = b.takeAllyScout(target)
+    pushEvents(ev)
+    if (ev.some((e) => e.t === 'scoutSuccess')) setTarget(null)
+    busyRef.current = false
+    setBusy(false)
+    bump()
+  }
+
   function reset() {
     bRef.current = new Battle(ALLIES, ENEMIES, seedRef.current + ':' + Math.floor(performance.now()))
     busyRef.current = false
@@ -97,11 +114,23 @@ export default function BattleScreen() {
   const allies = b.side('ally')
   const cur = b.current
   const isAllyTurn = cur?.side === 'ally' && b.outcome === 'ongoing'
+  const scoutInfo = target ? b.scoutFactorsFor(target) : null
+  const canScoutNow = target ? b.canScout(target) : false
+  const gaugePct = Math.round((b.scoutGauge / GAUGE_MAX) * 100)
 
   return (
     <div className="battle">
       <div className="b-round">
         ラウンド {b.round} ｜ {b.outcome === 'ongoing' ? (isAllyTurn ? `${cur?.name} の番` : '敵の番…') : '—'}
+        {b.recruited.length > 0 && <span className="b-recruited">🤝 仲間 {b.recruited.length}</span>}
+      </div>
+
+      <div className={`b-gauge${b.gaugeReady ? ' ready' : ''}`}>
+        <span className="b-gauge-label">スカウト</span>
+        <div className="b-gauge-bar">
+          <i style={{ width: `${gaugePct}%` }} />
+        </div>
+        <span className="b-gauge-val">{b.gaugeReady ? 'READY!' : `${gaugePct}%`}</span>
       </div>
 
       <div className="b-enemies">
@@ -137,10 +166,21 @@ export default function BattleScreen() {
             <div className="b-target-hint">
               {target ? `🎯 ${b.get(target)?.name} を狙う` : '🎯 タップで敵を指定（未指定=おまかせ）'}
             </div>
+            {scoutInfo && scoutInfo.scoutable && (
+              <div className={`b-scout-rate${canScoutNow ? ' active' : ''}`}>
+                🤝 スカウト成功率 {Math.round(scoutInfo.chance * 100)}%{' '}
+                <span className="b-scout-stars">{'☆'.repeat(scoutStars(scoutInfo.chance))}</span>
+                {!b.gaugeReady && <span className="b-scout-note">（ゲージ満タンで実行可）</span>}
+                {b.gaugeReady && <span className="b-scout-note">（もっと弱らせる/状態異常で上がる）</span>}
+              </div>
+            )}
             <VerticalReel ref={reelRef} reel={cur!.reel} />
             <div className="b-buttons">
               <button className="b-spin" onClick={doSpin} disabled={busy}>
                 🎰 スピン
+              </button>
+              <button className="b-scout" onClick={doScout} disabled={busy || !canScoutNow}>
+                🤝 スカウト
               </button>
               <label className="b-auto">
                 <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} />
@@ -151,6 +191,16 @@ export default function BattleScreen() {
         ) : b.outcome !== 'ongoing' ? (
           <div className={`b-result ${b.outcome}`}>
             <div className="b-result-text">{b.outcome === 'win' ? '🏆 WIN！' : '💀 LOSE…'}</div>
+            {b.recruited.length > 0 && (
+              <div className="b-recruit-list">
+                <div className="b-recruit-head">🤝 なかまになったコドモナ</div>
+                {b.recruited.map((u) => (
+                  <span key={u.uid} className="b-recruit-chip">
+                    {u.name}（{ATTRIBUTE_LABEL[u.attribute]}/{u.rank}）
+                  </span>
+                ))}
+              </div>
+            )}
             <button className="b-spin" onClick={reset}>
               もう一度
             </button>

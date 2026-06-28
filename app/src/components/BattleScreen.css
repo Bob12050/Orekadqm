@@ -13,6 +13,57 @@
   border-radius: 10px;
 }
 
+.b-recruited {
+  margin-left: 10px;
+  color: #ffd54f;
+  font-weight: 700;
+}
+
+.b-gauge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #131838;
+  border-radius: 10px;
+  border: 1px solid #232c55;
+}
+.b-gauge.ready {
+  border-color: #ff8a65;
+  box-shadow: 0 0 10px rgba(255, 138, 101, 0.35);
+}
+.b-gauge-label {
+  font-size: 11px;
+  color: #9aa3c8;
+  white-space: nowrap;
+}
+.b-gauge-bar {
+  flex: 1;
+  height: 9px;
+  border-radius: 5px;
+  background: #0c1024;
+  overflow: hidden;
+}
+.b-gauge-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff8a65, #ffd54f);
+  transition: width 0.3s ease;
+}
+.b-gauge.ready .b-gauge-bar i {
+  background: linear-gradient(90deg, #ffca28, #ff7043);
+  animation: gaugePulse 0.9s ease-in-out infinite;
+}
+@keyframes gaugePulse {
+  50% { filter: brightness(1.4); }
+}
+.b-gauge-val {
+  font-size: 11px;
+  color: #ffcc80;
+  min-width: 44px;
+  text-align: right;
+}
+
 .b-enemies,
 .b-allies {
   display: grid;
@@ -161,6 +212,56 @@
 }
 .b-spin:disabled {
   opacity: 0.5;
+}
+.b-scout {
+  padding: 13px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(180deg, #7e9bff, #5a6ad8);
+  box-shadow: 0 6px 16px rgba(90, 106, 216, 0.35);
+}
+.b-scout:disabled {
+  opacity: 0.4;
+  box-shadow: none;
+}
+.b-scout-rate {
+  font-size: 12px;
+  color: #b9c2ea;
+  text-align: center;
+}
+.b-scout-rate.active {
+  color: #aed1ff;
+  font-weight: 700;
+}
+.b-scout-stars {
+  color: #ffd54f;
+  letter-spacing: -1px;
+}
+.b-scout-note {
+  display: block;
+  font-size: 10px;
+  color: #6c769c;
+}
+.b-recruit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.b-recruit-head {
+  font-size: 13px;
+  color: #ffd54f;
+}
+.b-recruit-chip {
+  font-size: 13px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #1d265a;
+  border: 1px solid #3a4a8c;
+  color: #dfe6ff;
 }
 .b-auto {
   font-size: 13px;

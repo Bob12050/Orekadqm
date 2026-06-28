@@ -41,6 +41,10 @@ export interface BattleUnit {
   side: Side
   slot: number // 編成内の位置（0..3）
   attribute: Attribute
+  family: string
+  rank: string
+  scoutStar: number // スカウト難度★(1易〜5難)
+  scoutable: boolean // ボス/配合専用は false
   base: Stats
   hp: number
   maxHp: number
@@ -75,6 +79,9 @@ export type BattleEvent =
   | { t: 'drain'; uid: string; amount: number; text: string }
   | { t: 'poisonTick'; uid: string; amount: number; text: string }
   | { t: 'faint'; uid: string; text: string }
+  | { t: 'scoutAttempt'; uid: string; target: string; chance: number; text: string }
+  | { t: 'scoutSuccess'; target: string; name: string; text: string }
+  | { t: 'scoutFail'; target: string; bond: number; text: string }
   | { t: 'outcome'; outcome: Outcome; text: string }
 
 export interface UnitInit {
@@ -82,4 +89,5 @@ export interface UnitInit {
   level: number
   side: Side
   slot: number
+  boss?: boolean // true ならスカウト不可（設計書 5-11 / 6-6）
 }
