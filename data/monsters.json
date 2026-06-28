@@ -1,0 +1,339 @@
+{
+  "schemaVersion": 1,
+  "note": "種(species)マスタデータ。所持個体は別途IndexedDBで管理し、speciesId参照＋個体差(Lv/盤面/性格/継承)を持つ。stats=ランク基準の種族値(目安)。roulette=初期ルーレット盤(weightは出現重み)。",
+  "ranks": ["G", "F", "E", "D", "C", "B", "A", "S", "SS"],
+  "attributes": ["fire", "water", "wind", "earth", "light", "dark", "none"],
+  "families": ["beast", "dragon", "magic", "plant", "material", "aqua", "bird", "demon", "spirit", "machine"],
+  "monsters": [
+    {
+      "id": 1, "name": "モコル", "family": "beast", "rank": "F", "attribute": "earth",
+      "role": "physical_attacker", "scout": 1,
+      "stats": { "hp": 60, "atk": 22, "def": 14, "mag": 8, "spd": 16, "acc": 90, "luck": 10 },
+      "roulette": [
+        { "skill": "ひっかき", "type": "attack_single", "weight": 40 },
+        { "skill": "からだ当たり", "type": "attack_single", "weight": 25 },
+        { "skill": "うなり", "type": "debuff_atk", "weight": 20 },
+        { "skill": "はやがけ", "type": "buff_spd_self", "weight": 15 }
+      ]
+    },
+    {
+      "id": 2, "name": "トゲリス", "family": "beast", "rank": "E", "attribute": "earth",
+      "role": "physical_counter", "scout": 2,
+      "stats": { "hp": 70, "atk": 24, "def": 20, "mag": 8, "spd": 18, "acc": 90, "luck": 12 },
+      "roulette": [
+        { "skill": "トゲづき", "type": "attack_single", "weight": 35 },
+        { "skill": "ためこむ", "type": "buff_def_self", "weight": 25 },
+        { "skill": "すばやけり", "type": "attack_single", "weight": 25 },
+        { "skill": "とげのよろい", "type": "counter", "weight": 15 }
+      ]
+    },
+    {
+      "id": 3, "name": "ニャグモ", "family": "beast", "rank": "D", "attribute": "wind",
+      "role": "speed_attacker", "scout": 3,
+      "stats": { "hp": 75, "atk": 30, "def": 18, "mag": 12, "spd": 32, "acc": 92, "luck": 14 },
+      "roulette": [
+        { "skill": "かぜのつめ", "type": "attack_single", "weight": 40 },
+        { "skill": "はやがけ", "type": "buff_spd_self", "weight": 20 },
+        { "skill": "みだれ爪", "type": "attack_random", "weight": 25 },
+        { "skill": "けむまき", "type": "debuff_acc", "weight": 15 }
+      ]
+    },
+    {
+      "id": 4, "name": "ファイドラ", "family": "dragon", "rank": "D", "attribute": "fire",
+      "role": "attacker", "scout": 4,
+      "stats": { "hp": 80, "atk": 32, "def": 22, "mag": 20, "spd": 18, "acc": 90, "luck": 12 },
+      "roulette": [
+        { "skill": "かみつき", "type": "attack_single", "weight": 35 },
+        { "skill": "ファイア", "type": "magic_single", "weight": 30 },
+        { "skill": "りゅうのいぶき", "type": "attack_all", "weight": 20 },
+        { "skill": "ほえる", "type": "debuff_atk", "weight": 15 }
+      ]
+    },
+    {
+      "id": 5, "name": "アクアドン", "family": "dragon", "rank": "C", "attribute": "water",
+      "role": "bruiser", "scout": 4,
+      "stats": { "hp": 110, "atk": 34, "def": 30, "mag": 22, "spd": 20, "acc": 90, "luck": 12 },
+      "roulette": [
+        { "skill": "たいあたり", "type": "attack_single", "weight": 30 },
+        { "skill": "アクアジェット", "type": "magic_single", "weight": 30 },
+        { "skill": "うずまき", "type": "magic_all", "weight": 20 },
+        { "skill": "かたくなる", "type": "buff_def_self", "weight": 20 }
+      ]
+    },
+    {
+      "id": 6, "name": "ライゼル", "family": "dragon", "rank": "B", "attribute": "wind",
+      "role": "ace_attacker", "scout": 5,
+      "stats": { "hp": 120, "atk": 48, "def": 32, "mag": 30, "spd": 40, "acc": 94, "luck": 16 },
+      "roulette": [
+        { "skill": "かぜのキバ", "type": "attack_single", "weight": 35 },
+        { "skill": "らいげき", "type": "magic_single", "weight": 30 },
+        { "skill": "りゅうせい", "type": "magic_all", "weight": 20 },
+        { "skill": "きずなの咆哮", "type": "special_ultimate", "weight": 15 }
+      ]
+    },
+    {
+      "id": 7, "name": "ポフィム", "family": "magic", "rank": "F", "attribute": "none",
+      "role": "healer", "scout": 1,
+      "stats": { "hp": 55, "atk": 8, "def": 12, "mag": 24, "spd": 16, "acc": 95, "luck": 12 },
+      "roulette": [
+        { "skill": "ヒール", "type": "heal_single", "weight": 35 },
+        { "skill": "まもりのうた", "type": "buff_def_ally", "weight": 25 },
+        { "skill": "マジックボルト", "type": "magic_single", "weight": 25 },
+        { "skill": "きつけ", "type": "heal_single", "weight": 15 }
+      ]
+    },
+    {
+      "id": 8, "name": "マジェル", "family": "magic", "rank": "D", "attribute": "fire",
+      "role": "magic_attacker", "scout": 3,
+      "stats": { "hp": 65, "atk": 10, "def": 14, "mag": 36, "spd": 20, "acc": 95, "luck": 12 },
+      "roulette": [
+        { "skill": "ファイア", "type": "magic_single", "weight": 35 },
+        { "skill": "フレイムバースト", "type": "magic_all", "weight": 25 },
+        { "skill": "マナチャージ", "type": "buff_mag_self", "weight": 20 },
+        { "skill": "マジックボルト", "type": "magic_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 9, "name": "ノクィル", "family": "magic", "rank": "C", "attribute": "dark",
+      "role": "debuffer", "scout": 4,
+      "stats": { "hp": 75, "atk": 12, "def": 18, "mag": 40, "spd": 24, "acc": 95, "luck": 14 },
+      "roulette": [
+        { "skill": "シャドウボルト", "type": "magic_single", "weight": 30 },
+        { "skill": "よわらせのろい", "type": "debuff_atk", "weight": 25 },
+        { "skill": "ねむりのもや", "type": "status_sleep", "weight": 25 },
+        { "skill": "やみのころも", "type": "buff_def_self", "weight": 20 }
+      ]
+    },
+    {
+      "id": 10, "name": "フタバナ", "family": "plant", "rank": "F", "attribute": "earth",
+      "role": "support_healer", "scout": 1,
+      "stats": { "hp": 65, "atk": 12, "def": 18, "mag": 22, "spd": 14, "acc": 92, "luck": 12 },
+      "roulette": [
+        { "skill": "はっぱカッター", "type": "attack_single", "weight": 30 },
+        { "skill": "こうごうせい", "type": "heal_self", "weight": 30 },
+        { "skill": "めぶき", "type": "buff_def_ally", "weight": 25 },
+        { "skill": "どくのこな", "type": "status_poison", "weight": 15 }
+      ]
+    },
+    {
+      "id": 11, "name": "ツルギソウ", "family": "plant", "rank": "D", "attribute": "earth",
+      "role": "controller", "scout": 3,
+      "stats": { "hp": 80, "atk": 28, "def": 22, "mag": 18, "spd": 18, "acc": 90, "luck": 12 },
+      "roulette": [
+        { "skill": "つるむち", "type": "attack_single", "weight": 30 },
+        { "skill": "どくのこな", "type": "status_poison", "weight": 25 },
+        { "skill": "からめとる", "type": "debuff_spd", "weight": 25 },
+        { "skill": "はっぱカッター", "type": "attack_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 12, "name": "モリガミ", "family": "plant", "rank": "B", "attribute": "earth",
+      "role": "guardian_healer", "scout": 4,
+      "stats": { "hp": 140, "atk": 30, "def": 40, "mag": 30, "spd": 12, "acc": 90, "luck": 12 },
+      "roulette": [
+        { "skill": "いやしのもり", "type": "heal_all", "weight": 30 },
+        { "skill": "だいちのまもり", "type": "buff_def_ally", "weight": 25 },
+        { "skill": "こんぼう", "type": "attack_single", "weight": 25 },
+        { "skill": "やどりぎ", "type": "heal_self", "weight": 20 }
+      ]
+    },
+    {
+      "id": 13, "name": "コロリン", "family": "material", "rank": "F", "attribute": "none",
+      "role": "tank", "scout": 1,
+      "stats": { "hp": 90, "atk": 16, "def": 30, "mag": 6, "spd": 10, "acc": 88, "luck": 10 },
+      "roulette": [
+        { "skill": "たいあたり", "type": "attack_single", "weight": 30 },
+        { "skill": "かたくなる", "type": "buff_def_self", "weight": 35 },
+        { "skill": "いしつぶて", "type": "attack_single", "weight": 25 },
+        { "skill": "ふんばる", "type": "buff_def_self", "weight": 10 }
+      ]
+    },
+    {
+      "id": 14, "name": "ガレオス", "family": "material", "rank": "C", "attribute": "earth",
+      "role": "counter_tank", "scout": 4,
+      "stats": { "hp": 130, "atk": 28, "def": 44, "mag": 10, "spd": 12, "acc": 88, "luck": 10 },
+      "roulette": [
+        { "skill": "クリスタルガード", "type": "buff_def_self", "weight": 30 },
+        { "skill": "とげのよろい", "type": "counter", "weight": 25 },
+        { "skill": "クラッシュ", "type": "attack_single", "weight": 25 },
+        { "skill": "いしつぶて", "type": "attack_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 15, "name": "メタルゴ", "family": "material", "rank": "A", "attribute": "none",
+      "role": "wall_tank", "scout": 5,
+      "stats": { "hp": 170, "atk": 36, "def": 60, "mag": 12, "spd": 14, "acc": 88, "luck": 10 },
+      "roulette": [
+        { "skill": "てっぺきガード", "type": "buff_def_self", "weight": 30 },
+        { "skill": "メタルボディ", "type": "buff_def_self", "weight": 20 },
+        { "skill": "ヘビースマッシュ", "type": "attack_single", "weight": 30 },
+        { "skill": "かばう", "type": "guard_ally", "weight": 20 }
+      ]
+    },
+    {
+      "id": 16, "name": "プカリオ", "family": "aqua", "rank": "F", "attribute": "water",
+      "role": "balanced", "scout": 1,
+      "stats": { "hp": 65, "atk": 20, "def": 16, "mag": 18, "spd": 20, "acc": 92, "luck": 12 },
+      "roulette": [
+        { "skill": "みずでっぽう", "type": "magic_single", "weight": 35 },
+        { "skill": "あわまく", "type": "buff_def_self", "weight": 25 },
+        { "skill": "たいあたり", "type": "attack_single", "weight": 25 },
+        { "skill": "しぶき", "type": "debuff_acc", "weight": 15 }
+      ]
+    },
+    {
+      "id": 17, "name": "シャコウ", "family": "aqua", "rank": "D", "attribute": "water",
+      "role": "physical_defender", "scout": 3,
+      "stats": { "hp": 90, "atk": 34, "def": 28, "mag": 12, "spd": 22, "acc": 90, "luck": 14 },
+      "roulette": [
+        { "skill": "ソニックパンチ", "type": "attack_single", "weight": 35 },
+        { "skill": "こうらガード", "type": "buff_def_self", "weight": 25 },
+        { "skill": "どろをかける", "type": "debuff_acc", "weight": 20 },
+        { "skill": "みずでっぽう", "type": "magic_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 18, "name": "ウミナギ", "family": "aqua", "rank": "B", "attribute": "water",
+      "role": "aoe_mage", "scout": 4,
+      "stats": { "hp": 110, "atk": 28, "def": 26, "mag": 42, "spd": 24, "acc": 92, "luck": 12 },
+      "roulette": [
+        { "skill": "おおなみ", "type": "magic_all", "weight": 35 },
+        { "skill": "うずしお", "type": "magic_all", "weight": 25 },
+        { "skill": "かみつき", "type": "attack_single", "weight": 20 },
+        { "skill": "みずのまもり", "type": "buff_def_ally", "weight": 20 }
+      ]
+    },
+    {
+      "id": 19, "name": "ピヨット", "family": "bird", "rank": "F", "attribute": "wind",
+      "role": "speed_disruptor", "scout": 1,
+      "stats": { "hp": 55, "atk": 20, "def": 12, "mag": 12, "spd": 28, "acc": 92, "luck": 14 },
+      "roulette": [
+        { "skill": "つつく", "type": "attack_single", "weight": 35 },
+        { "skill": "かぜおこし", "type": "debuff_spd", "weight": 25 },
+        { "skill": "みだればね", "type": "attack_random", "weight": 25 },
+        { "skill": "はやがけ", "type": "buff_spd_self", "weight": 15 }
+      ]
+    },
+    {
+      "id": 20, "name": "カゼワシ", "family": "bird", "rank": "C", "attribute": "wind",
+      "role": "speed_attacker", "scout": 3,
+      "stats": { "hp": 85, "atk": 40, "def": 20, "mag": 16, "spd": 44, "acc": 94, "luck": 16 },
+      "roulette": [
+        { "skill": "きゅうこうか", "type": "attack_single", "weight": 35 },
+        { "skill": "かまいたち", "type": "magic_single", "weight": 25 },
+        { "skill": "ようげき", "type": "attack_single", "weight": 25 },
+        { "skill": "はやがけ", "type": "buff_spd_self", "weight": 15 }
+      ]
+    },
+    {
+      "id": 21, "name": "ライメイチョウ", "family": "bird", "rank": "A", "attribute": "wind",
+      "role": "aoe_mage", "scout": 5,
+      "stats": { "hp": 120, "atk": 34, "def": 28, "mag": 48, "spd": 40, "acc": 94, "luck": 16 },
+      "roulette": [
+        { "skill": "いかずちのつばさ", "type": "magic_all", "weight": 35 },
+        { "skill": "らいめい", "type": "status_paralyze", "weight": 25 },
+        { "skill": "かぜのまもり", "type": "buff_def_ally", "weight": 20 },
+        { "skill": "かまいたち", "type": "magic_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 22, "name": "チビム", "family": "demon", "rank": "E", "attribute": "dark",
+      "role": "trickster", "scout": 3,
+      "stats": { "hp": 60, "atk": 22, "def": 14, "mag": 24, "spd": 26, "acc": 90, "luck": 16 },
+      "roulette": [
+        { "skill": "ひっかき", "type": "attack_single", "weight": 30 },
+        { "skill": "いたずら", "type": "debuff_acc", "weight": 25 },
+        { "skill": "くらやみ", "type": "status_blind", "weight": 25 },
+        { "skill": "シャドウボルト", "type": "magic_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 23, "name": "グレモル", "family": "demon", "rank": "C", "attribute": "dark",
+      "role": "drain_attacker", "scout": 4,
+      "stats": { "hp": 95, "atk": 38, "def": 22, "mag": 26, "spd": 28, "acc": 92, "luck": 16 },
+      "roulette": [
+        { "skill": "ドレインクロー", "type": "attack_drain", "weight": 35 },
+        { "skill": "シャドウダイブ", "type": "attack_single", "weight": 25 },
+        { "skill": "おどす", "type": "debuff_atk", "weight": 20 },
+        { "skill": "シャドウボルト", "type": "magic_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 24, "name": "ヴェルゼ", "family": "demon", "rank": "A", "attribute": "dark",
+      "role": "ace_debuffer", "scout": 5,
+      "stats": { "hp": 130, "atk": 50, "def": 30, "mag": 44, "spd": 34, "acc": 94, "luck": 18 },
+      "roulette": [
+        { "skill": "ダークエッジ", "type": "attack_single", "weight": 30 },
+        { "skill": "のろいのやいば", "type": "status_poison", "weight": 25 },
+        { "skill": "シャドウレイン", "type": "magic_all", "weight": 25 },
+        { "skill": "やみのいちげき", "type": "special_ultimate", "weight": 20 }
+      ]
+    },
+    {
+      "id": 25, "name": "ヒカリム", "family": "spirit", "rank": "E", "attribute": "light",
+      "role": "healer", "scout": 2,
+      "stats": { "hp": 60, "atk": 10, "def": 16, "mag": 30, "spd": 22, "acc": 95, "luck": 14 },
+      "roulette": [
+        { "skill": "ライトヒール", "type": "heal_single", "weight": 35 },
+        { "skill": "きよめのひかり", "type": "cleanse", "weight": 25 },
+        { "skill": "ひかりのつぶて", "type": "magic_single", "weight": 25 },
+        { "skill": "まもりのひかり", "type": "buff_def_ally", "weight": 15 }
+      ]
+    },
+    {
+      "id": 26, "name": "セラフィ", "family": "spirit", "rank": "B", "attribute": "light",
+      "role": "support_reviver", "scout": 4,
+      "stats": { "hp": 105, "atk": 16, "def": 28, "mag": 42, "spd": 26, "acc": 95, "luck": 14 },
+      "roulette": [
+        { "skill": "リバイブ", "type": "revive", "weight": 25 },
+        { "skill": "せいなるかご", "type": "buff_def_ally", "weight": 30 },
+        { "skill": "ホーリーボルト", "type": "magic_single", "weight": 25 },
+        { "skill": "ライトヒール", "type": "heal_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 27, "name": "ルクシード", "family": "spirit", "rank": "A", "attribute": "light",
+      "role": "aoe_healer_attacker", "scout": 5,
+      "stats": { "hp": 130, "atk": 24, "def": 34, "mag": 52, "spd": 30, "acc": 96, "luck": 16 },
+      "roulette": [
+        { "skill": "スターヒール", "type": "heal_all", "weight": 30 },
+        { "skill": "ルクスレイ", "type": "magic_all", "weight": 30 },
+        { "skill": "かみのまもり", "type": "buff_def_ally", "weight": 20 },
+        { "skill": "きよめのひかり", "type": "cleanse", "weight": 20 }
+      ]
+    },
+    {
+      "id": 28, "name": "ボルギア", "family": "machine", "rank": "D", "attribute": "none",
+      "role": "armored_attacker", "scout": 3,
+      "stats": { "hp": 95, "atk": 34, "def": 32, "mag": 10, "spd": 16, "acc": 90, "luck": 10 },
+      "roulette": [
+        { "skill": "ボルトパンチ", "type": "attack_single", "weight": 35 },
+        { "skill": "そうこうてんかい", "type": "buff_def_self", "weight": 25 },
+        { "skill": "オーバーヒート", "type": "buff_atk_self", "weight": 20 },
+        { "skill": "たいあたり", "type": "attack_single", "weight": 20 }
+      ]
+    },
+    {
+      "id": 29, "name": "ギアロー", "family": "machine", "rank": "C", "attribute": "none",
+      "role": "artillery", "scout": 4,
+      "stats": { "hp": 100, "atk": 42, "def": 26, "mag": 20, "spd": 20, "acc": 94, "luck": 18 },
+      "roulette": [
+        { "skill": "キャノンショット", "type": "attack_single", "weight": 35 },
+        { "skill": "ロックオン", "type": "buff_crit_self", "weight": 25 },
+        { "skill": "スプレッドショット", "type": "attack_all", "weight": 25 },
+        { "skill": "ボルトパンチ", "type": "attack_single", "weight": 15 }
+      ]
+    },
+    {
+      "id": 30, "name": "オメガル", "family": "machine", "rank": "S", "attribute": "none",
+      "role": "omni_ace", "scout": 0, "fusionOnly": true,
+      "stats": { "hp": 180, "atk": 56, "def": 50, "mag": 50, "spd": 32, "acc": 96, "luck": 18 },
+      "roulette": [
+        { "skill": "オメガキャノン", "type": "attack_all", "weight": 25 },
+        { "skill": "アダプトシフト", "type": "buff_element_self", "weight": 25 },
+        { "skill": "リペアフィールド", "type": "heal_all", "weight": 25 },
+        { "skill": "オーバーオメガ", "type": "special_ultimate", "weight": 25 }
+      ]
+    }
+  ]
+}

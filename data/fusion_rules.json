@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "note": "配合ルール。決定順: 1)specialRecipesに合致→固定結果 2)合致しなければgenericで系統・ランク算出→候補プールから抽選。継承(スキル/ステ/属性/性格)はinheritanceで処理。",
+
+  "generic": {
+    "description": "汎用配合。親2体の系統相性表で子系統を決定、ランクは平均+ボーナスで算出。",
+    "rankOrder": ["G", "F", "E", "D", "C", "B", "A", "S", "SS"],
+    "rankFormula": "childRankIndex = floor((parentA.rankIndex + parentB.rankIndex) / 2) + rankBonus",
+    "rankBonus": {
+      "sameSpecies": 1,
+      "highAffinityFamilies": 1,
+      "bothMaxLevel": 1,
+      "maxTotalBonus": 2,
+      "note": "条件を満たすほど上位ランクへ。合計ボーナス上限2段階。"
+    },
+    "familyMatrix": {
+      "note": "親A系統×親B系統→子系統。対称表(A×B=B×A)。同系統は同系統を返す。",
+      "beast":   { "beast": "beast", "dragon": "dragon", "magic": "beast", "plant": "beast", "material": "beast", "aqua": "aqua", "bird": "bird", "demon": "demon", "spirit": "beast", "machine": "machine" },
+      "dragon":  { "beast": "dragon", "dragon": "dragon", "magic": "dragon", "plant": "dragon", "material": "dragon", "aqua": "dragon", "bird": "dragon", "demon": "demon", "spirit": "dragon", "machine": "dragon" },
+      "magic":   { "beast": "beast", "dragon": "dragon", "magic": "magic", "plant": "magic", "material": "magic", "aqua": "magic", "bird": "magic", "demon": "demon", "spirit": "spirit", "machine": "machine" },
+      "plant":   { "beast": "beast", "dragon": "dragon", "magic": "magic", "plant": "plant", "material": "plant", "aqua": "aqua", "bird": "plant", "demon": "demon", "spirit": "spirit", "machine": "material" },
+      "material":{ "beast": "beast", "dragon": "dragon", "magic": "magic", "plant": "plant", "material": "material", "aqua": "material", "bird": "material", "demon": "material", "spirit": "material", "machine": "machine" },
+      "aqua":    { "beast": "aqua", "dragon": "dragon", "magic": "magic", "plant": "aqua", "material": "material", "aqua": "aqua", "bird": "aqua", "demon": "demon", "spirit": "aqua", "machine": "machine" },
+      "bird":    { "beast": "bird", "dragon": "dragon", "magic": "magic", "plant": "plant", "material": "material", "aqua": "aqua", "bird": "bird", "demon": "demon", "spirit": "spirit", "machine": "machine" },
+      "demon":   { "beast": "demon", "dragon": "demon", "magic": "demon", "plant": "demon", "material": "material", "aqua": "demon", "bird": "demon", "demon": "demon", "spirit": "demon", "machine": "machine" },
+      "spirit":  { "beast": "beast", "dragon": "dragon", "magic": "spirit", "plant": "spirit", "material": "material", "aqua": "aqua", "bird": "spirit", "demon": "demon", "spirit": "spirit", "machine": "machine" },
+      "machine": { "beast": "machine", "dragon": "dragon", "magic": "machine", "plant": "material", "material": "machine", "aqua": "machine", "bird": "machine", "demon": "machine", "spirit": "machine", "machine": "machine" }
+    },
+    "highAffinityPairs": [
+      ["beast", "dragon"], ["aqua", "dragon"], ["magic", "spirit"], ["plant", "spirit"], ["material", "machine"], ["demon", "magic"]
+    ],
+    "candidateSelection": "子系統×子ランク帯のspeciesプールから、引き継ぎ要素と乱数で1種を抽選。複数候補はプレビューで提示。"
+  },
+
+  "inheritance": {
+    "skill": {
+      "rule": "親A・親Bの習得スキルからプレイヤーが最大2つ選択して継承。子のルーレット枠に初期セット。",
+      "maxInherit": 2,
+      "crossFamilyPenalty": "系統不一致スキルは継承コスト増 or 一部不可(無双化防止)。"
+    },
+    "stats": {
+      "rule": "子初期ステ = 種基礎値 + 親平均ステ × 継承係数。ランク上限でクランプ。",
+      "coefficient": 0.15
+    },
+    "attribute": {
+      "rule": "子属性=種固有属性を基本。親属性から確率でサブ属性(耐性)付与。",
+      "subAttributeChance": 0.35
+    },
+    "personality": {
+      "rule": "性格は確率で親から継承、それ以外は新規抽選。",
+      "inheritChance": 0.5,
+      "personalities": ["やんちゃ", "おっとり", "こうけつ", "きまぐれ", "まじめ", "ゆうかん"],
+      "effects": {
+        "やんちゃ": { "atk": 0.05, "berserkRate": 0.05, "tameability": -0.1 },
+        "おっとり": { "def": 0.05, "tameability": 0.15 },
+        "こうけつ": { "mag": 0.05, "critRate": 0.03, "tameability": -0.2 },
+        "きまぐれ": { "spd": 0.05, "tameability": -0.05 },
+        "まじめ": { "acc": 0.05, "tameability": 0.1 },
+        "ゆうかん": { "hp": 0.05, "atk": 0.03, "tameability": 0.0 }
+      }
+    },
+    "trait": {
+      "rule": "個性(小特性)は低確率で親から継承。",
+      "inheritChance": 0.2,
+      "examples": ["会心+5%", "毒耐性", "先制+", "スカウト成功率+", "経験値+"]
+    },
+    "lost": ["親2体は消費(消滅)", "選ばなかった継承スキル", "親の現在Lv"],
+    "kept": ["選んだ継承スキル(最大2)", "ステ継承ボーナス", "属性・性格の一部", "親の図鑑記録(残る)"]
+  },
+
+  "specialRecipes": [
+    {
+      "id": "sr_soukyokuryu",
+      "name": "双極竜ディオドラ",
+      "resultFamily": "dragon", "resultRank": "S", "resultAttribute": "fire",
+      "subAttribute": "water",
+      "parents": { "speciesA": 4, "speciesB": 18, "note": "ファイドラ × ウミナギ" },
+      "conditions": ["両親Lv上限", "5章クリア後"],
+      "hint": "火と水、相反する竜の力を一つに。"
+    },
+    {
+      "id": "sr_omegal",
+      "name": "オメガル",
+      "resultSpeciesId": 30,
+      "resultFamily": "machine", "resultRank": "S", "resultAttribute": "none",
+      "parents": { "speciesA": 29, "speciesB": 15, "requiredItem": "星のかけら(コア)", "note": "ギアロー × メタルゴ + 星のかけら" },
+      "conditions": ["6章クリア後", "素材:星のかけら(コア)を所持"],
+      "hint": "機械の極致に、星の鼓動を宿す。",
+      "mvp": true
+    },
+    {
+      "id": "sr_seirei_seraph",
+      "name": "光輝霊セラフィム",
+      "resultFamily": "spirit", "resultRank": "S", "resultAttribute": "light",
+      "parents": { "speciesA": 26, "speciesB": 27, "note": "セラフィ × ルクシード" },
+      "conditions": ["両親が『リバイブ』習得済み", "8章クリア後"],
+      "hint": "光の精霊が極まるとき、世界を照らす。"
+    }
+  ],
+
+  "ui": {
+    "preview": {
+      "show": ["子系統", "子ランク帯", "候補種名(複数可)", "継承予定スキル", "属性(主+副)", "特殊配合バッジ"],
+      "hide": ["最終抽選結果", "ステ正確乱数", "まれな個性発現"]
+    },
+    "reverseLookup": "目的種から必要な親系統/レシピを提示。特殊配合は一部のみ開示。",
+    "recommend": "手持ちから図鑑増加/戦力向上になる配合を自動提案。章進行に紐づけ。",
+    "safety": ["配合前に確認モーダル", "ロック個体は素材不可", "親は図鑑に残る旨を明記"]
+  }
+}
