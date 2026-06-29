@@ -2,10 +2,8 @@
 // リール育成・配合・バトル・スカウトが共有する所持個体の単一ソース。
 import { useSyncExternalStore } from 'react'
 import { createOwned, type OwnedMonster } from './collection'
-import { levelUpMutate } from '../reel/growth'
-import { poolForFamily, rareJumpChance } from '../data/monsters'
-import { getSpeciesById } from '../data/monsters'
-import { createRng } from '../reel/seededRng'
+import { getSpeciesById, poolForFamily } from '../data/monsters'
+import type { Panel } from '../types'
 
 export type DexState = 'seen' | 'owned'
 
@@ -143,22 +141,67 @@ export function recruitSpecies(speciesId: number, level = 1): OwnedMonster {
   return m
 }
 
-/** レベルアップ（オレカ式ランダム成長を1回適用して永続化） */
-export function levelUpMonster(uid: string): { before: string; after: string } | null {
+export const MAX_MOVES = 6
+
+/** ★ランク別の習得必要レベル（強技ほど後半に覚える） */
+export function requiredLevelForStar(star: number): number {
+  return ({ 1: 1, 2: 1, 3: 8, 4: 15 } as Record<number, number>)[star] ?? 1
+}
+
+/** レベルアップ（戦闘報酬で自動）。技はランダム変化せず、ステ/MPの伸びと習得解禁のみ。 */
+export function levelUpMonster(uid: string): number | null {
   const m = getMonster(uid)
   if (!m) return null
+  updateMonster(uid, { level: m.level + 1 })
+  return m.level + 1
+}
+
+export interface LearnableSkill {
+  skill: string
+  star: number
+  category: Panel['category']
+  requiredLevel: number
+}
+
+/** この個体がいま習得できる技（系統プール、未習得、レベル到達済み） */
+export function learnableSkills(uid: string): LearnableSkill[] {
+  const m = getMonster(uid)
+  if (!m) return []
   const sp = getSpeciesById(m.speciesId)
-  const pool = poolForFamily(sp?.family ?? 'beast')
-  const rng = createRng(`${uid}:${m.level}:${Math.floor(Math.random() * 1e9)}`)
-  const res = levelUpMutate(m.reel, pool, rng, { rareJumpChance })
-  updateMonster(uid, { reel: res.reel, level: m.level + 1 })
-  if (res.before && res.after) {
-    return {
-      before: res.before.category === 'miss' ? 'ミス' : res.before.skill,
-      after: res.after.skill,
-    }
-  }
-  return null
+  const known = new Set(m.reel.map((p) => p.skill))
+  const seen = new Set<string>()
+  return poolForFamily(sp?.family ?? 'beast')
+    .filter((p) => {
+      if (known.has(p.skill) || seen.has(p.skill)) return false
+      seen.add(p.skill)
+      return m.level >= requiredLevelForStar(p.star)
+    })
+    .map((p) => ({ skill: p.skill, star: p.star, category: p.category, requiredLevel: requiredLevelForStar(p.star) }))
+}
+
+/** 技を習得（技セットに追加）。最大 MAX_MOVES。 */
+export function learnSkill(uid: string, skill: string): boolean {
+  const m = getMonster(uid)
+  if (!m) return false
+  const known = m.reel.filter((p) => p.category !== 'miss')
+  if (known.length >= MAX_MOVES || known.some((p) => p.skill === skill)) return false
+  const sp = getSpeciesById(m.speciesId)
+  const def = poolForFamily(sp?.family ?? 'beast').find((p) => p.skill === skill)
+  if (!def) return false
+  updateMonster(uid, {
+    reel: [...known, { skill: def.skill, star: def.star, category: def.category, locked: false, isNew: true }],
+  })
+  return true
+}
+
+/** 技を忘れる（最低1つは残す） */
+export function forgetSkill(uid: string, skill: string): boolean {
+  const m = getMonster(uid)
+  if (!m) return false
+  const known = m.reel.filter((p) => p.category !== 'miss')
+  if (known.length <= 1) return false
+  updateMonster(uid, { reel: known.filter((p) => p.skill !== skill) })
+  return true
 }
 
 export const AWAKEN_LV = 15

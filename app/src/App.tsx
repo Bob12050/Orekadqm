@@ -1,28 +1,28 @@
 import { useState } from 'react'
 import AdventureScreen from './components/AdventureScreen'
+import CollectionScreen from './components/CollectionScreen'
 import DexScreen from './components/DexScreen'
 import FusionScreen from './components/FusionScreen'
-import TrainScreen from './components/TrainScreen'
 import './App.css'
 
-type View = 'train' | 'adventure' | 'fusion' | 'dex'
+type View = 'adventure' | 'collection' | 'fusion' | 'dex'
 
 export default function App() {
-  const [view, setView] = useState<View>('train')
+  const [view, setView] = useState<View>('adventure')
 
   return (
     <div className="app">
       <header className="app-head">
         <h1>コドモナ・サーガ</h1>
-        <p className="sub">プロトタイプ ｜ 育成・配合・バトル・スカウトの統合ループ</p>
+        <p className="sub">プロトタイプ ｜ 冒険・コドモナ育成・配合・図鑑</p>
       </header>
 
       <div className="view-tabs">
-        <button className={view === 'train' ? 'on' : ''} onClick={() => setView('train')}>
-          そだてる
-        </button>
         <button className={view === 'adventure' ? 'on' : ''} onClick={() => setView('adventure')}>
           ぼうけん
+        </button>
+        <button className={view === 'collection' ? 'on' : ''} onClick={() => setView('collection')}>
+          コドモナ
         </button>
         <button className={view === 'fusion' ? 'on' : ''} onClick={() => setView('fusion')}>
           配合
@@ -32,8 +32,8 @@ export default function App() {
         </button>
       </div>
 
-      {view === 'train' && <TrainScreen />}
       {view === 'adventure' && <AdventureScreen />}
+      {view === 'collection' && <CollectionScreen />}
       {view === 'fusion' && <FusionScreen />}
       {view === 'dex' && <DexScreen />}
 

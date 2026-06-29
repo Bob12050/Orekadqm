@@ -11,11 +11,12 @@ export function getSpeciesById(id: number): Species | undefined {
   return species.find((s) => s.id === id)
 }
 
-/** 種の初期 reel をランタイム Panel[] に変換 */
+/** 種の初期 reel をランタイムの技セットへ変換（ミス枠は撤去：DD-005で選択式に） */
 export function toRuntimeReel(s: Species): Panel[] {
   return s.reel
     .slice()
     .sort((a, b) => a.slot - b.slot)
+    .filter((p) => p.category !== 'miss')
     .map((p) => ({ skill: p.skill, star: p.star, category: p.category, locked: false, isNew: false }))
 }
 
