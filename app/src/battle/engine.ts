@@ -6,7 +6,8 @@ import { resolveStop } from '../reel/reelEngine'
 import { ATTRIBUTE_LABEL } from './attributes'
 import { computeDamage, effStat, hasStatus, hitChance } from './formulas'
 import { resolveSkill, type SkillDef, type TargetShape } from './skills'
-import { enemyPanelIndex, pickAttackTarget, pickWoundedAlly } from './ai'
+import { chooseMoveIndex, pickAttackTarget, pickWoundedAlly } from './ai'
+import { moveCost, MP_REGEN } from './cost'
 import { makeParty, makeUnit } from './setup'
 import { GAUGE_MAX, scoutFactors, type ScoutFactors } from './scout'
 import type { BattleEvent, BattleUnit, Outcome, Side, StatusInstance, StatusKind, UnitInit } from './types'
@@ -162,14 +163,14 @@ export class Battle {
   }
 
   // ---- 手番実行 ----
-  /** おまかせ用：現在ユニットのリール自動停止 index */
+  /** オート/AI用：MPで使える技から自動選択 */
   autoPanelIndex(): number {
     const u = this.current
     if (!u) return 0
-    return Math.floor(this.rng() * u.reel.length)
+    return chooseMoveIndex(u, this.rng)
   }
 
-  /** 味方の手番。panelIndex=停止位置、targetUid=ロック対象(無ければAI)。 */
+  /** 味方の手番。panelIndex=選んだ技、targetUid=ロック対象(無ければAI)。 */
   takeAllyTurn(panelIndex: number, targetUid?: string | null): BattleEvent[] {
     return this.resolveTurn(panelIndex, targetUid ?? null)
   }
@@ -178,7 +179,7 @@ export class Battle {
   takeEnemyTurn(): BattleEvent[] {
     const u = this.current
     if (!u) return []
-    const idx = enemyPanelIndex(u, this.rng)
+    const idx = chooseMoveIndex(u, this.rng)
     return this.resolveTurn(idx, null)
   }
 
@@ -191,6 +192,9 @@ export class Battle {
     }
 
     events.push({ t: 'turnStart', uid: actor.uid, text: `${actor.name} の手番` })
+
+    // MP回復（手番開始ごと）
+    actor.mp = Math.min(actor.maxMp, actor.mp + MP_REGEN)
 
     // 行動不能判定（眠り・麻痺）
     if (hasStatus(actor, 'sleep')) {
@@ -227,6 +231,9 @@ export class Battle {
       this.advance(events)
       return events
     }
+
+    // MP消費（コストを払って技を使う）
+    actor.mp = Math.max(0, actor.mp - moveCost(panel))
 
     const skill = resolveSkill(panel)
     const confused = hasStatus(actor, 'confuse')

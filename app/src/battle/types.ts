@@ -48,7 +48,9 @@ export interface BattleUnit {
   base: Stats
   hp: number
   maxHp: number
-  reel: Panel[]
+  mp: number
+  maxMp: number
+  reel: Panel[] // 既知の技セット（旧リール。ミス枠は選択不可として無視）
   statuses: StatusInstance[]
   alive: boolean
   awakened?: boolean

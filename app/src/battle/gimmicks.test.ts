@@ -38,15 +38,16 @@ describe('boss gimmicks', () => {
   })
 
   it('summoning boss can add minions mid-battle (enemy count exceeds initial)', () => {
+    // 自己回復しない硬いボス(メタルゴ)。フェーズ移行まで生き残り召喚する。
     const boss: UnitInit = {
-      speciesId: 12, level: 24, side: 'enemy', slot: 0, boss: true, hpMultiplier: 8,
+      speciesId: 15, level: 24, side: 'enemy', slot: 0, boss: true, hpMultiplier: 6,
       name: '召喚ボス', gimmicks: ['phases', 'summon'], minionSpeciesId: 1, minionLevel: 8,
     }
     const allyUnits = STRONG_ALLY.map(makeUnit)
     const b = Battle.fromUnits([...allyUnits, makeUnit(boss)], 'summon')
     let maxEnemies = b.aliveOf('enemy').length
     let n = 0
-    while (b.outcome === 'ongoing' && n++ < 600) {
+    while (b.outcome === 'ongoing' && n++ < 2000) {
       maxEnemies = Math.max(maxEnemies, b.units.filter((u) => u.side === 'enemy').length)
       if (b.isAllyTurn()) b.takeAllyTurn(b.autoPanelIndex(), null)
       else b.takeEnemyTurn()

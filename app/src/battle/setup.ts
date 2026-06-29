@@ -1,6 +1,7 @@
 // 種データ + レベルから戦闘ユニットを生成する。
 import { getSpeciesById, toRuntimeReel } from '../data/monsters'
 import type { OwnedMonster } from '../state/collection'
+import { maxMpFor } from './cost'
 import type { Attribute, BattleUnit, Stats, UnitInit } from './types'
 
 /** レベルによるステータス倍率（おだやかな線形成長） */
@@ -54,7 +55,9 @@ export function makeUnitFromOwned(owned: OwnedMonster, slot: number): BattleUnit
     base,
     hp: base.hp,
     maxHp: base.hp,
-    reel: owned.reel.map((p) => ({ ...p })), // 育った個体のリールを持ち込む
+    mp: maxMpFor(owned.level),
+    maxMp: maxMpFor(owned.level),
+    reel: owned.reel.map((p) => ({ ...p })), // 育った個体の技セットを持ち込む
     statuses: [],
     alive: true,
     awakened: owned.awakened,
@@ -81,6 +84,8 @@ export function makeUnit(init: UnitInit): BattleUnit {
     base,
     hp: maxHp,
     maxHp,
+    mp: maxMpFor(init.level),
+    maxMp: maxMpFor(init.level),
     reel: toRuntimeReel(sp),
     statuses: [],
     alive: true,

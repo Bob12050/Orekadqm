@@ -8,7 +8,7 @@ function unit(attr: Attribute, over: Partial<BattleUnit['base']> = {}, statuses:
     uid: 'u', name: 'u', speciesId: 0, side: 'ally', slot: 0, attribute: attr,
     family: 'beast', rank: 'F', scoutStar: 3, scoutable: false,
     base: { hp: 100, atk: 40, def: 20, mag: 30, spd: 20, acc: 95, luck: 10, ...over },
-    hp: 100, maxHp: 100, reel: [], statuses, alive: true,
+    hp: 100, maxHp: 100, mp: 20, maxMp: 20, reel: [], statuses, alive: true,
   }
 }
 

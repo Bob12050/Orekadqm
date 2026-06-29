@@ -1,6 +1,6 @@
 // ターゲット選択AI（設計書 5-6）と敵の行動選択。
 import { elementResult } from './attributes'
-import { autoStopIndex } from '../reel/reelEngine'
+import { moveCost } from './cost'
 import type { Rng } from '../reel/seededRng'
 import type { BattleUnit } from './types'
 
@@ -29,7 +29,14 @@ export function pickWoundedAlly(allies: BattleUnit[]): BattleUnit | null {
   return alive.reduce((a, b) => (a.hp / a.maxHp <= b.hp / b.maxHp ? a : b))
 }
 
-/** 敵のリール行動を選ぶ（おまかせ＝均等抽選） */
-export function enemyPanelIndex(actor: BattleUnit, rng: Rng): number {
-  return autoStopIndex(actor.reel.length, rng)
+/** 技を選ぶ（MPで使える技のうち、強い★を優先しつつ少しランダム）。
+ *  敵AIと味方オート、どちらにも使う。ミス枠は除外。 */
+export function chooseMoveIndex(actor: BattleUnit, rng: Rng): number {
+  const all = actor.reel.map((p, i) => ({ p, i })).filter(({ p }) => p.category !== 'miss')
+  if (all.length === 0) return 0
+  const affordable = all.filter(({ p }) => moveCost(p) <= actor.mp)
+  const pool = affordable.length > 0 ? affordable : [all.slice().sort((a, b) => moveCost(a.p) - moveCost(b.p))[0]]
+  const topStar = Math.max(...pool.map(({ p }) => p.star))
+  const top = pool.filter(({ p }) => p.star === topStar)
+  return top[Math.floor(rng() * top.length)].i
 }

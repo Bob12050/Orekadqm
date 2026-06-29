@@ -1,15 +1,19 @@
-// Phaser 4 バトル本実装。既存の純TSエンジン(Battle)を駆動し、描画/演出/入力を Phaser で行う。
-// 機能: ターゲット指定・スピン(おまかせ)・スカウト(ゲージ/成功率)・状態異常表示・
-//       ボスギミック(フェーズ/属性シフト/召喚)・会心/弱点/暴走演出・WIN/LOSE。
+// Phaser 4 バトル。技は「選択式（コマンド）」＋MPコスト。エンジン(Battle)を駆動し描画/演出/入力を担う。
+// 機能: 敵タップでターゲット→技ボタンをタップで実行(MP消費)、スカウト、状態異常、ボスギミック、各種演出。
 import Phaser from 'phaser'
 import type { Battle } from '../battle/engine'
 import type { BattleEvent, BattleUnit, StatusKind } from '../battle/types'
 import { ATTRIBUTE_LABEL } from '../battle/attributes'
 import { GAUGE_MAX, scoutStars } from '../battle/scout'
+import { moveCost } from '../battle/cost'
 
 const FAMILY_COLOR: Record<string, number> = {
   beast: 0xff7043, dragon: 0xef5350, magic: 0xab47bc, plant: 0x9ccc65, material: 0x8d99ae,
   aqua: 0x42a5f5, bird: 0x4dd0e1, demon: 0xc2185b, spirit: 0xfff176, machine: 0x26c6da,
+}
+const CAT_COLOR: Record<string, number> = {
+  attack: 0x2a356e, magic: 0x3a2a6e, heal: 0x2f5a2a, buff: 0x224a6e, defense: 0x224a6e,
+  debuff: 0x4a2a3a, support: 0x5a5a2a, ultimate: 0x6a4a1a,
 }
 const STATUS_SHORT: Record<StatusKind, string> = {
   poison: '毒', paralyze: '麻', sleep: '眠', confuse: '混', seal: '封', blind: '暗',
@@ -26,7 +30,7 @@ export interface SceneOpts {
 class UnitView {
   container: Phaser.GameObjects.Container
   private body: Phaser.GameObjects.Graphics
-  private hpBar: Phaser.GameObjects.Graphics
+  private bars: Phaser.GameObjects.Graphics
   private nameText: Phaser.GameObjects.Text
   private statusText: Phaser.GameObjects.Text
   private ring: Phaser.GameObjects.Graphics
@@ -42,11 +46,11 @@ class UnitView {
     this.radius = unit.gimmicks?.includes('phases') ? 34 : 24
     this.ring = scene.add.graphics()
     this.body = scene.add.graphics()
-    this.hpBar = scene.add.graphics()
+    this.bars = scene.add.graphics()
     const label = (unit.gimmicks?.includes('phases') ? '👑' : '') + unit.name
     this.nameText = scene.add.text(0, -this.radius - 15, label, { fontSize: '11px', color: '#eef1ff', fontStyle: 'bold' }).setOrigin(0.5)
-    this.statusText = scene.add.text(0, this.radius + 13, '', { fontSize: '10px', color: '#ffd0d0' }).setOrigin(0.5)
-    this.container = scene.add.container(x, y, [this.ring, this.body, this.hpBar, this.nameText, this.statusText])
+    this.statusText = scene.add.text(0, this.radius + 16, '', { fontSize: '10px', color: '#ffd0d0' }).setOrigin(0.5)
+    this.container = scene.add.container(x, y, [this.ring, this.body, this.bars, this.nameText, this.statusText])
     this.draw()
     scene.tweens.add({ targets: this.container, y: y - 4, duration: 900 + Math.random() * 300, yoyo: true, repeat: -1, ease: 'Sine.inOut' })
     if (unit.side === 'enemy') {
@@ -71,12 +75,18 @@ class UnitView {
   refresh() {
     const r = this.radius
     const w = r * 2
-    const ratio = Math.max(0, this.unit.hp / this.unit.maxHp)
-    const col = ratio > 0.5 ? 0x66bb6a : ratio > 0.2 ? 0xffca28 : 0xff5252
-    this.hpBar.clear()
-    this.hpBar.fillStyle(0x0c1024, 1).fillRoundedRect(-w / 2, r + 4, w, 5, 3)
-    this.hpBar.fillStyle(col, 1).fillRoundedRect(-w / 2, r + 4, w * ratio, 5, 3)
-    // 状態異常 + ボスのフェーズ/属性
+    const hpR = Math.max(0, this.unit.hp / this.unit.maxHp)
+    const hpCol = hpR > 0.5 ? 0x66bb6a : hpR > 0.2 ? 0xffca28 : 0xff5252
+    this.bars.clear()
+    // HP
+    this.bars.fillStyle(0x0c1024, 1).fillRoundedRect(-w / 2, r + 4, w, 5, 2)
+    this.bars.fillStyle(hpCol, 1).fillRoundedRect(-w / 2, r + 4, w * hpR, 5, 2)
+    // MP（味方のみ表示）
+    if (this.unit.side === 'ally' && this.unit.maxMp > 0) {
+      const mpR = Math.max(0, this.unit.mp / this.unit.maxMp)
+      this.bars.fillStyle(0x0c1024, 1).fillRoundedRect(-w / 2, r + 10, w, 3, 1)
+      this.bars.fillStyle(0x4aa3ff, 1).fillRoundedRect(-w / 2, r + 10, w * mpR, 3, 1)
+    }
     const parts: string[] = []
     if (this.unit.gimmicks?.includes('phases')) parts.push(`P${this.unit.phase ?? 1}/${ATTRIBUTE_LABEL[this.unit.attribute]}`)
     for (const s of this.unit.statuses) parts.push(STATUS_SHORT[s.kind])
@@ -100,11 +110,11 @@ export class BattleScene extends Phaser.Scene {
   private targetUid: string | null = null
   private busy = false
   private auto = false
-  private spinBtn!: Phaser.GameObjects.Container
   private scoutBtn!: Phaser.GameObjects.Container
   private autoBtn!: Phaser.GameObjects.Container
-  private reelCells: { c: Phaser.GameObjects.Container; t: Phaser.GameObjects.Text }[] = []
+  private moveButtons: Phaser.GameObjects.Container[] = []
   private hint!: Phaser.GameObjects.Text
+  private mpInfo!: Phaser.GameObjects.Text
   private scoutRate!: Phaser.GameObjects.Text
   private banner!: Phaser.GameObjects.Text
   private gauge!: Phaser.GameObjects.Graphics
@@ -121,29 +131,26 @@ export class BattleScene extends Phaser.Scene {
     this.roundText = this.add.text(14, 22, '', { fontSize: '12px', color: '#aeb6dd' })
     this.autoBtn = this.makeToggle(W - 52, 28, 'オート', () => {
       this.auto = !this.auto
-      this.refreshAutoBtn()
+      this.drawToggle(this.autoBtn, this.auto)
       if (this.auto) this.loop()
     })
-    // スカウトゲージ
     this.add.text(14, 44, 'スカウト', { fontSize: '10px', color: '#9aa3c8' })
     this.gauge = this.add.graphics()
 
-    this.layoutSide('enemy', 135)
-    this.layoutSide('ally', 350)
+    this.layoutSide('enemy', 130)
+    this.layoutSide('ally', 330)
 
-    this.hint = this.add.text(W / 2, 250, '', { fontSize: '12px', color: '#ffcc80' }).setOrigin(0.5)
-    this.banner = this.add.text(W / 2, 210, '', { fontSize: '19px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5).setAlpha(0)
-    this.scoutRate = this.add.text(W / 2, 520, '', { fontSize: '12px', color: '#aed1ff' }).setOrigin(0.5)
+    this.hint = this.add.text(W / 2, 240, '', { fontSize: '12px', color: '#ffcc80' }).setOrigin(0.5)
+    this.banner = this.add.text(W / 2, 200, '', { fontSize: '19px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5).setAlpha(0)
+    this.mpInfo = this.add.text(W / 2, 408, '', { fontSize: '12px', color: '#9fd0ff' }).setOrigin(0.5)
+    this.scoutRate = this.add.text(W / 2, 392, '', { fontSize: '12px', color: '#aed1ff' }).setOrigin(0.5)
 
-    this.makeReelCells()
-    this.spinBtn = this.makeButton(118, 592, '🎰 スピン', 0xffb300, 0x1b2240, () => this.onSpin())
-    this.scoutBtn = this.makeButton(280, 592, '🤝 スカウト', 0x5a6ad8, 0xffffff, () => this.onScout())
+    this.scoutBtn = this.makeButton(W / 2, 600, '🤝 スカウト', 0x5a6ad8, 0xffffff, () => this.onScout())
 
     this.refresh()
     this.loop()
   }
 
-  // ---- レイアウト/ボタン ----
   private layoutSide(side: 'ally' | 'enemy', y: number) {
     const units = this.b.side(side)
     const n = Math.max(units.length, 1)
@@ -161,24 +168,22 @@ export class BattleScene extends Phaser.Scene {
     missing.forEach((u) => {
       const i = enemies.indexOf(u)
       const x = (W / (n + 1)) * (i + 1)
-      const v = new UnitView(this, u, x, 135)
+      const v = new UnitView(this, u, x, 130)
       this.views.set(u.uid, v)
       v.container.setScale(0)
       this.tweens.add({ targets: v.container, scale: 1, duration: 280, ease: 'Back.out' })
     })
   }
 
+  // ---- ボタン ----
   private makeButton(x: number, y: number, label: string, color: number, textColor: number, onClick: () => void) {
     const g = this.add.graphics()
-    g.fillStyle(color, 1).fillRoundedRect(-72, -22, 144, 44, 12)
-    const t = this.add.text(0, 0, label, { fontSize: '16px', color: Phaser.Display.Color.IntegerToColor(textColor).rgba, fontStyle: 'bold' }).setOrigin(0.5)
-    const c = this.add.container(x, y, [g, t]).setSize(144, 44).setInteractive()
+    g.fillStyle(color, 1).fillRoundedRect(-72, -20, 144, 40, 12)
+    const t = this.add.text(0, 0, label, { fontSize: '15px', color: Phaser.Display.Color.IntegerToColor(textColor).rgba, fontStyle: 'bold' }).setOrigin(0.5)
+    const c = this.add.container(x, y, [g, t]).setSize(144, 40).setInteractive()
     c.on('pointerdown', onClick)
-    c.setData('bg', g)
-    c.setData('color', color)
     return c
   }
-
   private makeToggle(x: number, y: number, label: string, onClick: () => void) {
     const g = this.add.graphics()
     const t = this.add.text(0, 0, label, { fontSize: '12px', color: '#b9c2ea', fontStyle: 'bold' }).setOrigin(0.5)
@@ -195,70 +200,54 @@ export class BattleScene extends Phaser.Scene {
     g.lineStyle(1, on ? 0x4a5aa8 : 0x2c3566, 1).strokeRoundedRect(-36, -13, 72, 26, 8)
     ;(c.getData('label') as Phaser.GameObjects.Text).setColor(on ? '#ffffff' : '#b9c2ea')
   }
-  private refreshAutoBtn() {
-    this.drawToggle(this.autoBtn, this.auto)
-  }
-
   private setButtonEnabled(c: Phaser.GameObjects.Container, on: boolean) {
     c.setAlpha(on ? 1 : 0.4)
     if (on) c.setInteractive()
     else c.disableInteractive()
   }
 
-  private makeReelCells() {
-    const cy = [430, 466, 502]
-    cy.forEach((y, i) => {
-      const center = i === 1
+  // ---- 技コマンドメニュー ----
+  private clearMoves() {
+    this.moveButtons.forEach((c) => c.destroy())
+    this.moveButtons = []
+    this.mpInfo.setText('')
+  }
+  private showMoves(actor: BattleUnit) {
+    this.clearMoves()
+    this.mpInfo.setText(`MP ${actor.mp}/${actor.maxMp}`)
+    const moves = actor.reel.map((p, i) => ({ p, i })).filter(({ p }) => p.category !== 'miss').slice(0, 6)
+    const cols = [105, 285]
+    const rowY = [438, 478, 518]
+    moves.forEach(({ p, i }, k) => {
+      const x = cols[k % 2]
+      const y = rowY[Math.floor(k / 2)]
+      const cost = moveCost(p)
+      const afford = actor.mp >= cost
+      const base = CAT_COLOR[p.category] ?? 0x2a356e
       const g = this.add.graphics()
-      g.fillStyle(center ? 0x222c55 : 0x161c3a, 1).fillRoundedRect(-92, -17, 184, 34, 8)
-      if (center) g.lineStyle(2, 0xffd54f, 1).strokeRoundedRect(-92, -17, 184, 34, 8)
-      const t = this.add.text(0, 0, '', { fontSize: center ? '15px' : '13px', color: '#ffe082', fontStyle: 'bold' }).setOrigin(0.5)
-      const c = this.add.container(W / 2, y, [g, t]).setAlpha(center ? 1 : 0.5)
-      this.reelCells.push({ c, t })
-    })
-  }
-  private setReelLabels(actor: BattleUnit, centerIdx: number) {
-    const n = actor.reel.length
-    for (let k = -1; k <= 1; k++) {
-      const p = actor.reel[((centerIdx + k) % n + n) % n]
-      this.reelCells[k + 1].t.setText(p.category === 'miss' ? 'ミス' : `${'★'.repeat(p.star)} ${p.skill}`)
-      this.reelCells[k + 1].t.setColor(p.category === 'miss' ? '#99a3bf' : '#ffe082')
-    }
-  }
-  private spinReel(actor: BattleUnit, idx: number) {
-    return new Promise<void>((res) => {
-      const n = actor.reel.length
-      let t = 0
-      const total = 16
-      const step = () => {
-        this.setReelLabels(actor, t % n)
-        t++
-        if (t <= total) this.time.delayedCall(35 + t * 7, step)
-        else {
-          this.setReelLabels(actor, idx)
-          this.tweens.add({ targets: this.reelCells[1].c, scaleX: 1.1, scaleY: 0.9, duration: 80, yoyo: true })
-          this.time.delayedCall(130, () => res())
-        }
+      g.fillStyle(afford ? base : 0x161c2e, 1).fillRoundedRect(-86, -17, 172, 34, 9)
+      g.lineStyle(1.5, p.category === 'ultimate' ? 0xffca28 : 0x3a4a8c, afford ? 1 : 0.4).strokeRoundedRect(-86, -17, 172, 34, 9)
+      const name = this.add.text(-78, 0, p.skill, { fontSize: '14px', color: afford ? '#ffffff' : '#7d86a8', fontStyle: 'bold' }).setOrigin(0, 0.5)
+      const costT = this.add.text(78, 0, `${cost}`, { fontSize: '13px', color: afford ? '#9fd0ff' : '#5a6488', fontStyle: 'bold' }).setOrigin(1, 0.5)
+      const c = this.add.container(x, y, [g, name, costT]).setSize(172, 34)
+      if (afford) {
+        c.setInteractive()
+        c.on('pointerdown', () => this.onSelectMove(i))
       }
-      step()
+      this.moveButtons.push(c)
     })
   }
 
-  // ---- 状態更新 ----
   private refresh() {
     this.roundText.setText(`ラウンド ${this.b.round}`)
     for (const v of this.views.values()) v.refresh()
-    // ゲージ
     const pct = this.b.scoutGauge / GAUGE_MAX
     this.gauge.clear()
     this.gauge.fillStyle(0x0c1024, 1).fillRoundedRect(64, 40, W - 84, 8, 4)
     this.gauge.fillStyle(this.b.gaugeReady ? 0xffca28 : 0xff8a65, 1).fillRoundedRect(64, 40, (W - 84) * pct, 8, 4)
-    // スカウト成功率
     if (this.targetUid && this.b.isAllyTurn()) {
       const f = this.b.scoutFactorsFor(this.targetUid)
-      if (f && f.scoutable) {
-        this.scoutRate.setText(`🤝 ${Math.round(f.chance * 100)}% ${'☆'.repeat(scoutStars(f.chance))}${this.b.gaugeReady ? '' : '（ゲージ満タンで）'}`)
-      } else this.scoutRate.setText('')
+      this.scoutRate.setText(f && f.scoutable ? `🤝 ${Math.round(f.chance * 100)}% ${'☆'.repeat(scoutStars(f.chance))}${this.b.gaugeReady ? '' : '（ゲージ満タンで）'}` : '')
     } else this.scoutRate.setText('')
     this.setButtonEnabled(this.scoutBtn, !!this.targetUid && this.b.canScout(this.targetUid) && !this.busy)
   }
@@ -280,7 +269,7 @@ export class BattleScene extends Phaser.Scene {
     const cur = this.b.current
     if (!cur) return
     if (cur.side === 'enemy') {
-      this.spinBtn.setVisible(false)
+      this.clearMoves()
       this.scoutBtn.setVisible(false)
       this.hint.setText('敵の番…')
       this.time.delayedCall(420, async () => {
@@ -288,24 +277,20 @@ export class BattleScene extends Phaser.Scene {
         this.loop()
       })
     } else {
-      this.spinBtn.setVisible(true)
       this.scoutBtn.setVisible(true)
-      this.hint.setText(this.targetUid ? `🎯 ${this.b.get(this.targetUid)?.name}` : 'タップで敵を指定 / スピン')
-      this.setReelLabels(cur, 0)
-      if (this.auto && !this.busy) this.time.delayedCall(350, () => this.onSpin())
+      this.hint.setText(this.targetUid ? `🎯 ${this.b.get(this.targetUid)?.name} ／ 技をえらぶ` : 'タップで敵を指定 → 技をえらぶ')
+      this.showMoves(cur)
+      if (this.auto && !this.busy) this.time.delayedCall(350, () => this.onSelectMove(this.b.autoPanelIndex()))
     }
   }
 
-  private async onSpin() {
+  private async onSelectMove(index: number) {
     if (this.busy || this.b.outcome !== 'ongoing' || !this.b.isAllyTurn()) return
     this.busy = true
-    this.spinBtn.setVisible(false)
+    this.clearMoves()
     this.scoutBtn.setVisible(false)
-    const actor = this.b.current!
-    const idx = this.b.autoPanelIndex()
-    await this.spinReel(actor, idx)
     const tgt = this.targetUid && this.b.get(this.targetUid)?.alive ? this.targetUid : null
-    await this.playEvents(this.b.takeAllyTurn(idx, tgt))
+    await this.playEvents(this.b.takeAllyTurn(index, tgt))
     this.busy = false
     this.loop()
   }
@@ -313,7 +298,7 @@ export class BattleScene extends Phaser.Scene {
   private async onScout() {
     if (this.busy || !this.targetUid || !this.b.canScout(this.targetUid)) return
     this.busy = true
-    this.spinBtn.setVisible(false)
+    this.clearMoves()
     this.scoutBtn.setVisible(false)
     const foe = this.b.get(this.targetUid)
     const speciesId = foe?.speciesId ?? 0
@@ -434,7 +419,7 @@ export class BattleScene extends Phaser.Scene {
   }
   private showResult() {
     const win = this.b.outcome === 'win'
-    this.spinBtn.setVisible(false)
+    this.clearMoves()
     this.scoutBtn.setVisible(false)
     this.hint.setText('')
     const t = this.add.text(W / 2, 280, win ? '🏆 WIN！' : '💀 LOSE…', { fontSize: '38px', color: win ? '#ffd54f' : '#ff6b6b', fontStyle: 'bold' }).setOrigin(0.5).setScale(0)
