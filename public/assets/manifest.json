@@ -1,0 +1,5 @@
+{
+  "_comment": "実PNGを追加したらここに列挙するとプロシージャル生成を上書きします。chars は public/assets/char/<key>.png(384x1728), enemies は public/assets/enemy/<key>.png を参照します。",
+  "chars": [],
+  "enemies": []
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "q_slime_cull",
+    "name": "スライム退治",
+    "kind": "normal",
+    "rank": 1,
+    "targetEnemy": "en_slime",
+    "count": 5,
+    "map": "map_field",
+    "rewardExp": 60,
+    "rewardItems": [{ "itemId": "item_potion_s", "count": 2 }],
+    "desc": "みどりの野のスライムを5体退治してほしい。"
+  },
+  {
+    "id": "q_wolf_pack",
+    "name": "狼の群れ",
+    "kind": "normal",
+    "rank": 2,
+    "targetEnemy": "en_wolf",
+    "count": 4,
+    "map": "map_field",
+    "rewardExp": 120,
+    "rewardItems": [{ "itemId": "mat_iron_shard", "count": 2 }],
+    "desc": "野を荒らす狼を4体しとめてくれ。"
+  },
+  {
+    "id": "q_ember_hunt",
+    "name": "獣王狩り",
+    "kind": "hunt",
+    "rank": 3,
+    "targetEnemy": "en_ember_lord",
+    "count": 1,
+    "map": "map_arena_ember",
+    "rewardExp": 400,
+    "rewardItems": [{ "itemId": "mat_ember_core", "count": 1 }],
+    "desc": "灼熱の闘技場でもえさかる獣王を討伐せよ。専用の刀が手に入る。"
+  }
+]

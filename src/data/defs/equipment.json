@@ -1,0 +1,16 @@
+[
+  { "id": "eq_wood_sword", "name": "もくとうの剣", "slot": "weapon", "rarity": 1, "weaponTag": "sword", "element": "none", "statMods": { "str": 4 }, "reqTier": 1, "desc": "訓練用の木剣。まずはここから。" },
+  { "id": "eq_apprentice_wand", "name": "見習いの杖", "slot": "weapon", "rarity": 1, "weaponTag": "wand", "element": "none", "statMods": { "int": 4 }, "reqTier": 1, "desc": "魔力を少しだけ増幅する杖。" },
+  { "id": "eq_short_mace", "name": "みならいの槌", "slot": "weapon", "rarity": 1, "weaponTag": "mace", "element": "none", "statMods": { "str": 2, "int": 2 }, "reqTier": 1, "desc": "祈りをこめて振るう小さな槌。" },
+  { "id": "eq_rusty_dagger", "name": "さびた短剣", "slot": "weapon", "rarity": 1, "weaponTag": "dagger", "element": "none", "statMods": { "dex": 4 }, "reqTier": 1, "desc": "素早く刺すのに向く軽い刃。" },
+  { "id": "eq_worn_whip", "name": "つかいこんだ鞭", "slot": "weapon", "rarity": 1, "weaponTag": "whip", "element": "none", "statMods": { "dex": 3, "luk": 1 }, "reqTier": 1, "desc": "相棒を導くための鞭。" },
+  { "id": "eq_cloth_cap", "name": "ぬのの帽子", "slot": "head", "rarity": 1, "statMods": { "vit": 1 }, "derivedMods": { "def": 2 }, "reqTier": 1, "desc": "やわらかい布の帽子。" },
+  { "id": "eq_cloth_robe", "name": "ぬのの服", "slot": "body", "rarity": 1, "statMods": { "vit": 2 }, "derivedMods": { "def": 4 }, "reqTier": 1, "desc": "軽くて動きやすい普段着。" },
+  { "id": "eq_leather_boots", "name": "かわの靴", "slot": "feet", "rarity": 1, "statMods": { "dex": 1 }, "derivedMods": { "def": 2, "moveSpeed": 6 }, "reqTier": 1, "desc": "足取りが少し軽くなる。" },
+  { "id": "eq_fang_dagger", "name": "きばのナイフ", "slot": "weapon", "rarity": 2, "weaponTag": "dagger", "element": "none", "statMods": { "dex": 7, "luk": 1 }, "reqTier": 1, "desc": "オオカミの牙を仕込んだ鋭利な短剣。" },
+  { "id": "eq_round_shield", "name": "まるい盾", "slot": "back", "rarity": 2, "weaponTag": "shield", "statMods": { "vit": 3 }, "derivedMods": { "def": 8 }, "reqTier": 1, "desc": "背に負う頑丈な円盾。" },
+  { "id": "eq_ember_blade", "name": "もえさしの刀", "slot": "weapon", "rarity": 4, "weaponTag": "katana", "element": "fire", "statMods": { "str": 12, "dex": 4 }, "reqTier": 1, "desc": "獣王の核を鍛え込んだ、燃える刀。" },
+  { "id": "eq_ember_blade_plus", "name": "もえさしの刀・改", "slot": "weapon", "rarity": 5, "weaponTag": "katana", "element": "fire", "statMods": { "str": 18, "dex": 6 }, "derivedMods": { "critRate": 0.05 }, "reqTier": 1, "desc": "核をさらに埋め込み、灼熱を極めた一振り。" },
+  { "id": "eq_ring_str", "name": "ちからの指輪", "slot": "acc1", "rarity": 2, "statMods": { "str": 3 }, "reqTier": 1, "desc": "攻撃系の指輪。腕力を高める。" },
+  { "id": "eq_charm_guard", "name": "まもりの護符", "slot": "acc2", "rarity": 2, "statMods": { "vit": 3 }, "derivedMods": { "def": 3 }, "reqTier": 1, "desc": "防御系の護符。身を守る。" }
+]

@@ -1,0 +1,9 @@
+[
+  { "id": "mat_slime_gel", "name": "スライムのゲル", "kind": "material", "desc": "ぷるぷるした素材。ぬのの下地に使う。", "stack": 99, "rarity": 1 },
+  { "id": "mat_wolf_fang", "name": "オオカミの牙", "kind": "material", "desc": "鋭い牙。刃物の芯にできる。", "stack": 99, "rarity": 2 },
+  { "id": "mat_bat_wing", "name": "コウモリの翼膜", "kind": "material", "desc": "薄く軽い膜。軽装の裏地に。", "stack": 99, "rarity": 2 },
+  { "id": "mat_iron_shard", "name": "くず鉄", "kind": "material", "desc": "どこにでもある金属片。加工の要。", "stack": 99, "rarity": 1 },
+  { "id": "mat_ember_core", "name": "もえさし核", "kind": "material", "desc": "獣王の内に燃える灼熱の核。専用装備の心臓部。", "stack": 99, "rarity": 5 },
+  { "id": "item_potion_s", "name": "やくそう水・小", "kind": "consumable", "desc": "HPを40回復する。", "stack": 20, "rarity": 1 },
+  { "id": "item_ether_s", "name": "まりょく水・小", "kind": "consumable", "desc": "MPを25回復する。", "stack": 20, "rarity": 2 }
+]

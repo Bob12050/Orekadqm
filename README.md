@@ -1,41 +1,41 @@
-# モンスター育成・配合バトルRPG 設計プロジェクト
+# Orekadqm
 
-スマホ向け（PWA 先行 → 将来ネイティブ化）モンスター育成・配合・スカウトバトル RPG の
-完全オリジナル企画・設計リポジトリです。
+モバイル縦画面専用の PWA アクションRPG。チョコットランド風のかわいいドット絵を土台に、
+モンスターハンター風の「狩猟クエスト→ボス素材収集→専用武器クラフト」ループを核にする。
+（既存作品の名称・キャラ・素材・固有デザインは模倣しないオリジナル。）
 
-> 参考イメージ（開発者向けの内部参照のみ）：アーケード型モンスター召喚バトル、王道モンスター配合RPG。
-> 本設計はそれらの**魅力の構造だけ**を抽出し、名称・モンスター・技名・UI・世界観・固有システムは
-> すべてオリジナルとして再設計しています。
+現在は **Phase 0（基盤縦切り）** が完成: 起動 → タイトル → 職業選択 → 町 → フィールド →
+敵討伐 → ドロップ → 装備 → クラフト → クエスト → セーブ → PWA、＋合成SE＋検証ツール。
 
-## ドキュメント構成
+## 技術スタック
+Phaser 4.2.0 / TypeScript 6（strict, any禁止）/ Vite 8 / Vitest 4 / vite-plugin-pwa 1。
+セーブは IndexedDB（Service Worker キャッシュに入れない）。
 
-| ファイル | 内容 |
-| --- | --- |
-| [`docs/game-design.md`](docs/game-design.md) | **メイン設計書**（全15章。コンセプト〜MVP〜ワイヤーフレーム） |
-| [`docs/design-decisions.md`](docs/design-decisions.md) | **設計判断ログ**（確定事項。縦式リール／覚醒／配合方針など） |
-| [`docs/monsters.md`](docs/monsters.md) | 初期実装用モンスター30体の詳細設計 |
-| [`docs/chapters.md`](docs/chapters.md) | 全10章のストーリー・進行・ボス設計 |
-| [`data/monsters.json`](data/monsters.json) | モンスター30体の機械可読データ（MVP実装用） |
-| [`data/fusion_rules.json`](data/fusion_rules.json) | 配合ルール（汎用・特殊）の機械可読データ |
-| [`data/chapters.json`](data/chapters.json) | 章・ステージ進行の機械可読データ |
+## 開発
+```bash
+npm install
+npm run dev            # 開発サーバ
+npm run typecheck      # strict 型検査
+npm run validate-data  # データ整合の自作バリデータ
+npm run test           # 純ロジックの Vitest
+npm run build          # 本番ビルド（tsc + vite + PWA）
+```
+変更のたびに typecheck / validate-data / test / build の4点を通すこと。
 
-## 仮タイトル案
+## 画面・操作
+- 論理解像度 幅360固定・高さ640〜800クランプ、整数倍率＋レターボックス、pixelArt。
+- 仮想スティック（画面左）＋攻撃 / スキル / 調べる ボタン（画面右）。マルチタッチ対応。
+- 横画面ではポーズ＋警告オーバーレイ。タブ非表示で自動保存。
 
-1. **コドモナ・サーガ（KODOMONA SAGA）**
-2. **ルーレットビースト（RouletteBeast）**
-3. **きみとモンスターの星（Hoshi to Kemono）**
-4. **アルカナ・タクティカ（ARCANA TACTICA）**
-5. **ぐるぐるバトル ピクシーズ（GuruGuru Pixies）**
+## アセットの差し替え
+プロシージャル・プレースホルダーを起動時に生成する。実PNGを `public/assets/` に置き
+`public/assets/manifest.json` に登録すると、そのキーだけ自動で上書きされる（コード変更不要）。
+詳細は [`public/assets/README.md`](public/assets/README.md)。
 
-## 一言コンセプト
-
-> **「タップとルーレットだけで、本格モンスター配合RPGが手のひらに」**
-
-## 開発フェーズ
-
-- **Phase 0 — MVP（PWA）**：1章 / モンスター12体 / 4対4ルーレットバトル / スカウト / 簡易配合 / 図鑑
-- **Phase 1**：2〜3章解放、特殊配合、図鑑逆引き、サウンド強化
-- **Phase 2**：全10章、性格・覚醒、クラウドセーブ
-- **Phase 3**：ネイティブアプリ化（Capacitor / React Native ラップ）
-
-詳細は [`docs/game-design.md`](docs/game-design.md) の「13. MVP設計」を参照してください。
+## ドキュメント
+- [docs/ROADMAP.md](docs/ROADMAP.md) — フェーズと完了条件
+- [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) — ゲームシステム仕様
+- [docs/ART_SPEC.md](docs/ART_SPEC.md) — ドット絵の不変仕様
+- [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md) — データ定義スキーマ
+- [docs/STATUS.md](docs/STATUS.md) — 現在の実装状況
+- [docs/REMAKE_KIT.md](docs/REMAKE_KIT.md) — 元となった開発キット（参照資料）

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "rc_fang_dagger",
+    "output": "eq_fang_dagger",
+    "materials": [
+      { "itemId": "mat_wolf_fang", "count": 3 },
+      { "itemId": "mat_iron_shard", "count": 1 }
+    ]
+  },
+  {
+    "id": "rc_round_shield",
+    "output": "eq_round_shield",
+    "materials": [{ "itemId": "mat_iron_shard", "count": 4 }]
+  },
+  {
+    "id": "rc_cloth_robe",
+    "output": "eq_cloth_robe",
+    "materials": [
+      { "itemId": "mat_slime_gel", "count": 3 },
+      { "itemId": "mat_bat_wing", "count": 1 }
+    ]
+  },
+  {
+    "id": "rc_ember_blade_plus",
+    "output": "eq_ember_blade_plus",
+    "upgradeFrom": "eq_ember_blade",
+    "materials": [{ "itemId": "mat_ember_core", "count": 2 }]
+  }
+]

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "job_warrior",
+    "name": "戦士",
+    "tier": 1,
+    "branch": "warrior",
+    "appearance": "char_warrior",
+    "statBase": { "str": 6, "vit": 5, "int": 1, "dex": 3, "luk": 2 },
+    "statGrowth": { "str": 2, "vit": 2, "int": 0, "dex": 1, "luk": 1 },
+    "weaponTags": ["sword", "axe", "spear", "shield"],
+    "desc": "近接で前に出る守りの要。剣と盾を扱う。"
+  },
+  {
+    "id": "job_mage",
+    "name": "魔法使い",
+    "tier": 1,
+    "branch": "mage",
+    "appearance": "char_mage",
+    "statBase": { "str": 1, "vit": 2, "int": 7, "dex": 3, "luk": 3 },
+    "statGrowth": { "str": 0, "vit": 1, "int": 3, "dex": 1, "luk": 1 },
+    "weaponTags": ["staff", "wand"],
+    "desc": "属性魔法で弱点を突く後衛。杖を握る。"
+  },
+  {
+    "id": "job_priest",
+    "name": "僧侶",
+    "tier": 1,
+    "branch": "priest",
+    "appearance": "char_priest",
+    "statBase": { "str": 3, "vit": 4, "int": 5, "dex": 2, "luk": 3 },
+    "statGrowth": { "str": 1, "vit": 2, "int": 2, "dex": 1, "luk": 1 },
+    "weaponTags": ["mace", "staff"],
+    "desc": "回復と聖属性で仲間を支える。槌を振るう。"
+  },
+  {
+    "id": "job_thief",
+    "name": "盗賊",
+    "tier": 1,
+    "branch": "thief",
+    "appearance": "char_thief",
+    "statBase": { "str": 3, "vit": 3, "int": 2, "dex": 7, "luk": 4 },
+    "statGrowth": { "str": 1, "vit": 1, "int": 0, "dex": 3, "luk": 2 },
+    "weaponTags": ["dagger", "shuriken", "bow"],
+    "desc": "素早さと運で立ち回る手練れ。短剣を使う。"
+  },
+  {
+    "id": "job_tamer",
+    "name": "テイマー",
+    "tier": 1,
+    "branch": "tamer",
+    "appearance": "char_tamer",
+    "statBase": { "str": 3, "vit": 4, "int": 4, "dex": 4, "luk": 5 },
+    "statGrowth": { "str": 1, "vit": 1, "int": 1, "dex": 2, "luk": 2 },
+    "weaponTags": ["whip"],
+    "desc": "相棒とともに戦う獣使い。鞭を操る。"
+  }
+]

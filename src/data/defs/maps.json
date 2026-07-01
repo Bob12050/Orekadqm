@@ -1,0 +1,36 @@
+[
+  {
+    "id": "map_town",
+    "name": "しずかな町",
+    "kind": "town",
+    "widthTiles": 20,
+    "heightTiles": 24,
+    "palette": { "ground": "#c8b48a", "groundAlt": "#bda87d", "accent": "#7fa86a", "edge": "#6b5a3e" },
+    "spawns": [],
+    "exits": [{ "toMap": "map_field", "tx": 10, "ty": 1, "label": "みどりの野へ" }]
+  },
+  {
+    "id": "map_field",
+    "name": "みどりの野",
+    "kind": "field",
+    "widthTiles": 24,
+    "heightTiles": 30,
+    "palette": { "ground": "#6fae5a", "groundAlt": "#639f50", "accent": "#4c7d3d", "edge": "#3c5a2f" },
+    "spawns": [
+      { "enemy": "en_slime", "count": 4 },
+      { "enemy": "en_wolf", "count": 3 },
+      { "enemy": "en_bat", "count": 2 }
+    ],
+    "exits": [{ "toMap": "map_town", "tx": 12, "ty": 28, "label": "町へもどる" }]
+  },
+  {
+    "id": "map_arena_ember",
+    "name": "灼熱の闘技場",
+    "kind": "arena",
+    "widthTiles": 20,
+    "heightTiles": 20,
+    "palette": { "ground": "#7a4436", "groundAlt": "#6b3a2e", "accent": "#c9542f", "edge": "#3a1f18" },
+    "spawns": [{ "enemy": "en_ember_lord", "count": 1 }],
+    "exits": [{ "toMap": "map_town", "tx": 10, "ty": 18, "label": "町へもどる" }]
+  }
+]

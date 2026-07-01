@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1b1030" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Orekadqm</title>
+    <!-- 日本語ドットフォント。自己ホスト(woff2)があれば優先、無ければオンライン→monospace。 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: 'DotGothic16';
+        font-display: swap;
+        src: url('/assets/fonts/dotgothic16.woff2') format('woff2');
+      }
+    </style>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0c0718;
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        overscroll-behavior: none;
+      }
+      #app {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: #cbb8f0;
+        font-family: system-ui, sans-serif;
+        background: #0c0718;
+        z-index: 10;
+      }
+      #boot-splash .title {
+        font-size: 20px;
+        letter-spacing: 2px;
+        color: #e8dcff;
+      }
+      #boot-splash .sub {
+        font-size: 12px;
+        color: #7d6ba8;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="boot-splash">
+      <div class="title">Orekadqm</div>
+      <div class="sub">よみこみちゅう…</div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

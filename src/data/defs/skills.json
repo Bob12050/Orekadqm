@@ -1,0 +1,48 @@
+[
+  {
+    "id": "sk_power_slash",
+    "name": "パワースラッシュ",
+    "branch": "warrior",
+    "reqLevel": 1,
+    "prereq": [],
+    "minTier": 1,
+    "mpCost": 4,
+    "effect": { "type": "damage", "power": 1.6 },
+    "desc": "力を込めた一撃。前方に大ダメージ。"
+  },
+  {
+    "id": "sk_guard_up",
+    "name": "ガードアップ",
+    "branch": "warrior",
+    "reqLevel": 4,
+    "prereq": ["sk_power_slash"],
+    "minTier": 1,
+    "mpCost": 5,
+    "effect": { "type": "buff", "power": 10, "durationMs": 6000 },
+    "desc": "一定時間、防御力を上げる。"
+  },
+  {
+    "id": "sk_fireball",
+    "name": "ファイアボール",
+    "branch": "mage",
+    "reqLevel": 3,
+    "prereq": [],
+    "minTier": 1,
+    "mpCost": 8,
+    "element": "fire",
+    "effect": { "type": "projectile", "power": 2.0, "projectileSpeed": 220 },
+    "desc": "火の弾を放つ。氷の敵に有効。"
+  },
+  {
+    "id": "sk_heal",
+    "name": "ヒール",
+    "branch": "priest",
+    "reqLevel": 2,
+    "prereq": [],
+    "minTier": 1,
+    "mpCost": 6,
+    "element": "holy",
+    "effect": { "type": "heal", "power": 20 },
+    "desc": "自身のHPを回復する。"
+  }
+]

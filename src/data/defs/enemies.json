@@ -1,0 +1,54 @@
+[
+  {
+    "id": "en_slime",
+    "name": "あわスライム",
+    "level": 3,
+    "isBoss": false,
+    "element": "none",
+    "weakness": "fire",
+    "base": { "str": 4, "vit": 6, "int": 1, "dex": 2, "luk": 2 },
+    "behavior": "wander",
+    "dropTable": "dt_slime",
+    "visual": { "sprite": "slime", "color": "#57c98a", "size": 26, "shape": "slime" },
+    "exp": 8
+  },
+  {
+    "id": "en_wolf",
+    "name": "のら狼",
+    "level": 5,
+    "isBoss": false,
+    "element": "none",
+    "base": { "str": 8, "vit": 6, "int": 1, "dex": 7, "luk": 3 },
+    "behavior": "chase",
+    "dropTable": "dt_wolf",
+    "visual": { "sprite": "wolf", "color": "#9a8c7a", "size": 30, "shape": "beast" },
+    "exp": 16
+  },
+  {
+    "id": "en_bat",
+    "name": "どうくつコウモリ",
+    "level": 6,
+    "isBoss": false,
+    "element": "dark",
+    "weakness": "holy",
+    "base": { "str": 7, "vit": 5, "int": 4, "dex": 9, "luk": 4 },
+    "behavior": "chase",
+    "dropTable": "dt_bat",
+    "visual": { "sprite": "bat", "color": "#6b5a8a", "size": 24, "shape": "flyer" },
+    "exp": 20
+  },
+  {
+    "id": "en_ember_lord",
+    "name": "もえさかる獣王",
+    "level": 12,
+    "isBoss": true,
+    "element": "fire",
+    "weakness": "ice",
+    "resist": "fire",
+    "base": { "str": 18, "vit": 22, "int": 8, "dex": 8, "luk": 5 },
+    "behavior": "boss",
+    "dropTable": "dt_boss",
+    "visual": { "sprite": "ember_lord", "color": "#e0562f", "size": 54, "shape": "golem" },
+    "exp": 260
+  }
+]
